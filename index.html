@@ -4279,43 +4279,262 @@ span.model-cite {cursor:default}
 .habitat-gravity-table thead th {font-weight:650}
 @media (max-width:700px) {.habitat-gravity-table {display:block;overflow-x:auto}}
 
-/* System design redesign (13b-system-design.js). Scoped .sysd-* styles using existing tokens only; Grish to restyle (issue #9). */
-.sysd-layout {display:grid;grid-template-columns:minmax(0,1fr) 320px;gap:20px;align-items:start}
-@media (max-width:1000px) {.sysd-layout {grid-template-columns:1fr}}
-.sysd-figure {margin:0}
-.sysd-diagram,.sysd-sequence {width:100%;height:auto;display:block}
-.sysd-band rect {fill:rgba(160,180,200,.05);stroke:rgba(160,180,200,.18)}
-.sysd-band.is-planned rect {stroke-dasharray:6 5;fill:transparent}
-.sysd-band-label {fill:currentColor;font-size:12px;font-weight:650;opacity:.75}
-.sysd-edge {fill:none;stroke:currentColor;stroke-width:1.2;opacity:.28}
-.sysd-edge.is-lit {stroke:var(--amber);opacity:1;stroke-width:2}
-.sysd-arrowhead {fill:currentColor;opacity:.5} .sysd-arrowhead.is-lit {fill:var(--amber);opacity:1}
-.sysd-node {cursor:pointer}
-.sysd-node rect {fill:var(--bg,#0f1620);stroke:var(--sage);stroke-width:1.4}
-.sysd-node text {fill:currentColor;font-size:12px}
-.sysd-node.is-planned rect {stroke:rgba(160,180,200,.6);stroke-dasharray:5 4}
-.sysd-node.is-planned text {opacity:.7}
-.sysd-node:hover rect,.sysd-node:focus-visible rect {stroke:var(--amber);stroke-width:2}
-.sysd-node.is-selected rect {stroke:var(--amber);stroke-width:2.6}
-.sysd-node:focus {outline:none}
-.sysd-detail {border:1px solid rgba(160,180,200,.25);border-radius:8px;padding:12px 14px;position:sticky;top:12px}
-.sysd-detail h3 {margin:0 0 2px}
-.sysd-facts dt {font-weight:650;margin-top:8px;font-size:13px} .sysd-facts dd {margin:2px 0 0;font-size:13px;line-height:1.45;overflow-wrap:anywhere}
-.sysd-toggle {display:flex;gap:6px;margin:6px 0 10px;flex-wrap:wrap}
-.sysd-toggle button {border:1px solid rgba(160,180,200,.35);border-radius:999px;padding:4px 12px;background:transparent;color:inherit;font:inherit;font-size:13px;cursor:pointer}
-.sysd-toggle button[aria-pressed=true] {border-color:var(--amber);color:var(--amber)}
-.sysd-actor rect {fill:transparent;stroke:var(--sage)} .sysd-actor text {fill:currentColor;font-size:12px;font-weight:650}
-.sysd-actor line {stroke:currentColor;opacity:.2;stroke-dasharray:4 4}
-.sysd-actor.is-off {opacity:.35}
-.sysd-msg {fill:none;stroke:currentColor;stroke-width:1.3;opacity:.75}
-.sysd-msg-label {fill:currentColor;font-size:11.5px}
-.sysd-trace {list-style:none;margin:10px 0;padding:0;display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:10px;counter-reset:trace}
-.sysd-trace li {border:1px solid rgba(160,180,200,.25);border-radius:8px;padding:10px 12px;counter-increment:trace}
-.sysd-trace h4 {margin:0 0 4px;font-size:14px} .sysd-trace h4::before {content:counter(trace) ". ";color:var(--amber)}
-.sysd-trace p {margin:4px 0;font-size:13px;line-height:1.45;overflow-wrap:anywhere}
-.sysd-passed {color:var(--sage)} .sysd-removed {color:#d9534f}
-.sysd-gaps {display:grid;grid-template-columns:140px 1fr;gap:6px 14px;max-width:960px}
-.sysd-gaps dt {font-weight:650} .sysd-gaps dd {margin:0;line-height:1.45}
+/* System design (13b-system-design.js): C4 levels, request sequence, lineage, checker, deployment.
+   Scoped .sysd-* styles using existing tokens only (José Pablo, November 13); Grish restyles on top (issue #9). */
+.sysd-page {--sysd-gap:14px}
+.sysd-page [data-tier=checked] {--tier:var(--sage)} .sysd-page [data-tier=psi] {--tier:var(--amber)}
+.sysd-page [data-tier=model] {--tier:var(--accent)} .sysd-page [data-tier=context] {--tier:var(--muted)} .sysd-page [data-tier=planned] {--tier:var(--rule-strong)}
+.sysd-tier-dot {display:inline-block;width:8px;height:8px;border-radius:2px;background:var(--tier,var(--muted));margin-right:6px;vertical-align:baseline;flex:none}
+.sysd-stats {list-style:none;margin:8px 0 14px;padding:0;display:flex;flex-wrap:wrap;gap:0;border:1px solid var(--line);border-radius:10px;background:var(--surface);overflow:hidden}
+.sysd-stats li {flex:1 1 110px;padding:9px 14px;border-inline-end:1px solid var(--line);display:flex;flex-direction:column;gap:1px}
+.sysd-stats li:last-child {border-inline-end:0}
+.sysd-stats strong {font-size:18px;font-weight:650;font-variant-numeric:tabular-nums;color:var(--ink)}
+.sysd-stats span {font-size:11.5px;color:var(--muted)}
+.sysd-tabs {display:flex;gap:2px;border-bottom:1px solid var(--line);margin:0 0 12px;overflow-x:auto}
+.sysd-tabs button {all:unset;cursor:pointer;padding:8px 14px 9px;border-bottom:2px solid transparent;display:flex;flex-direction:column;gap:1px;color:var(--muted)}
+.sysd-tabs button span {font-size:14px;font-weight:620}
+.sysd-tabs button small {font-size:11px;opacity:.85}
+.sysd-tabs button:hover {color:var(--ink);background:var(--inset)}
+.sysd-tabs button[aria-selected=true] {color:var(--ink);border-bottom-color:var(--plum)}
+.sysd-tabs button[aria-selected=true] span {color:var(--plum)}
+.sysd-tabs button:focus-visible {outline:2px solid var(--plum);outline-offset:-2px}
+.sysd-tools {display:flex;flex-wrap:wrap;align-items:center;gap:8px 14px;margin:0 0 8px}
+.sysd-crumbs {display:flex;align-items:center;gap:6px;font-size:13px}
+.sysd-crumbs [aria-current] {font-weight:650;color:var(--ink)}
+.sysd-seg {display:inline-flex;border:1px solid var(--rule-strong);border-radius:8px;overflow:hidden}
+.sysd-seg button {border:0;border-inline-end:1px solid var(--line);background:transparent;color:var(--muted);font:inherit;font-size:12.5px;padding:5px 11px;cursor:pointer}
+.sysd-seg button:last-child {border-inline-end:0}
+.sysd-seg button span {font-family:var(--mono);font-size:10.5px;opacity:.75}
+.sysd-seg button[aria-pressed=true] {background:var(--select);color:var(--plum)}
+.sysd-seg button:hover {color:var(--ink)}
+.sysd-search {display:flex;align-items:center;gap:8px;flex:1 1 220px}
+.sysd-search input {width:100%;max-width:280px;padding:5px 10px;font:inherit;font-size:13px;border-radius:8px}
+.sysd-replay {display:inline-flex;align-items:center;gap:4px}
+.sysd-replay select {font:inherit;font-size:12.5px;padding:4px 6px;border-radius:8px}
+.sysd-icon-btn,.sysd-play {white-space:nowrap;border:1px solid var(--rule-strong);background:transparent;color:var(--ink);font:inherit;font-size:13px;border-radius:8px;padding:3px 10px;cursor:pointer;min-height:28px}
+.sysd-icon-btn {padding:3px 9px;font-size:15px;line-height:1}
+.sysd-play[aria-pressed=true] {background:var(--select);border-color:var(--plum);color:var(--plum)}
+.sysd-icon-btn:hover,.sysd-play:hover {border-color:var(--plum)}
+.sysd-export {display:inline-flex;gap:4px;margin-inline-start:auto}
+.sysd-export .outline {font-size:12px;padding:3px 10px;border-radius:8px}
+.sysd-chips {display:flex;flex-wrap:wrap;gap:5px;margin:0 0 8px}
+.sysd-chip {display:inline-flex;align-items:center;border:1px solid var(--line);border-radius:999px;background:transparent;color:var(--muted);font:inherit;font-size:12px;padding:3px 10px;cursor:pointer}
+.sysd-chip[aria-pressed=true] {border-color:var(--rule-strong);color:var(--ink);background:var(--surface)}
+.sysd-chip[aria-pressed=false] {text-decoration:line-through;opacity:.7}
+.sysd-filters .sysd-chip[aria-pressed=false] .sysd-tier-dot {opacity:.35}
+.sysd-chips:not(.sysd-filters) .sysd-chip[aria-pressed=false] {text-decoration:none;opacity:1}
+.sysd-chip:hover {border-color:var(--plum)}
+.sysd-layout {display:grid;grid-template-columns:minmax(0,1fr) 300px;gap:14px;align-items:start}
+@media (max-width:1100px) {.sysd-layout {grid-template-columns:1fr}}
+.sysd-figure {margin:0;min-width:0}
+/* Canvas */
+.sysd-stage {position:relative;height:min(640px,72vh);min-height:460px;border:1px solid var(--line);border-radius:12px;overflow:hidden;cursor:grab;touch-action:none;
+  background:radial-gradient(circle,color-mix(in srgb,var(--rule-strong) 45%,transparent) 1px,transparent 1.2px) 0 0/22px 22px,var(--inset)}
+.sysd-stage.is-dragging {cursor:grabbing}
+.sysd-stage:focus-visible {outline:2px solid var(--plum);outline-offset:2px}
+.sysd-canvas {width:100%;height:100%;display:block;user-select:none;font-family:inherit}
+.sysd-grp rect {fill:color-mix(in srgb,var(--surface) 55%,transparent);stroke:var(--rule-strong);stroke-width:1;stroke-dasharray:6 5}
+.sysd-grp.is-planned rect {stroke-dasharray:2 5;stroke-linecap:round;fill:transparent}
+.sysd-grp.is-deploy rect {stroke-dasharray:none;fill:color-mix(in srgb,var(--raised) 50%,transparent)}
+.sysd-grp-bevel {fill:none;stroke:var(--rule-strong);stroke-width:1}
+.sysd-grp-title {font-size:calc(13px * var(--k,1));font-weight:650;fill:var(--ink)}
+.sysd-grp-sub {font-size:10.5px;fill:var(--muted);font-family:var(--mono)}
+.sysd-grp .sysd-ico {stroke:var(--muted)}
+.sysd-ico {fill:none;stroke:var(--tier,var(--muted));stroke-width:1.4;stroke-linecap:round;stroke-linejoin:round}
+.sysd-n {cursor:pointer;transition:opacity .18s ease}
+.sysd-n-box {fill:var(--surface);stroke:var(--line);stroke-width:1.2;transition:stroke .15s ease,fill .15s ease}
+.sysd-n-stripe {fill:var(--tier)}
+.sysd-n-head {fill:var(--surface);stroke:var(--tier);stroke-width:1.4}
+.sysd-n[data-type=person] .sysd-n-box {stroke:var(--tier)}
+.sysd-n[data-type=system] .sysd-n-box {fill:var(--select);stroke:var(--plum);stroke-width:1.8}
+.sysd-n[data-type=system] {--tier:var(--plum)}
+.sysd-n-label {font-size:calc(13px * var(--k,1));font-weight:650;fill:var(--ink)}
+.sysd-n-label.is-big {font-size:calc(19px * var(--k,1))}
+.sysd-n-tech {font-size:calc(10.5px * var(--k,1));fill:var(--muted);font-family:var(--mono)}
+.sysd-n-desc {font-size:calc(11.5px * var(--k,1));fill:var(--muted)}
+.sysd-n-count {font-size:calc(11px * var(--k,1));font-weight:600;fill:var(--tier);font-variant-numeric:tabular-nums}
+.sysd-n-drill {fill:none;stroke:var(--muted);stroke-width:1.4;stroke-linecap:round}
+.sysd-n[data-planned] .sysd-n-box {stroke-dasharray:5 4;fill:transparent;stroke:var(--rule-strong)}
+.sysd-n[data-planned] text {opacity:.75}
+.sysd-n:hover .sysd-n-box,.sysd-n:focus-visible .sysd-n-box {stroke:var(--plum);stroke-width:2}
+.sysd-n:focus {outline:none}
+.sysd-n:focus-visible .sysd-n-box {stroke-width:2.6}
+.sysd-n.is-sel .sysd-n-box {stroke:var(--plum);stroke-width:2.6;fill:var(--select)}
+.sysd-e-hit {fill:none;stroke:transparent;stroke-width:12}
+.sysd-e-line {fill:none;stroke:var(--muted);stroke-width:1.3;opacity:.6;transition:opacity .18s ease,stroke .18s ease}
+[data-kind=async] > .sysd-e-line,.sysd-e-line[data-kind=async] {stroke-dasharray:8 5}
+[data-kind=build] > .sysd-e-line,.sysd-e-line[data-kind=build] {stroke-dasharray:11 4 2 4}
+[data-kind=planned] > .sysd-e-line,.sysd-e-line[data-kind=planned] {stroke-dasharray:1.5 5;stroke-linecap:round;stroke:var(--rule-strong)}
+.sysd-e:hover .sysd-e-line {opacity:1;stroke:var(--ink)}
+.sysd-arrowhead {fill:var(--muted)} .sysd-arrowhead.is-hi {fill:var(--plum)}
+.sysd-e-label {font-size:calc(11px * var(--k,1));fill:var(--muted);paint-order:stroke fill;stroke:var(--inset);stroke-width:4px;stroke-linejoin:round;opacity:0;pointer-events:none;transition:opacity .18s ease}
+.sysd-e-label.is-shown {opacity:1}
+.sysd-e-label.is-path,.sysd-e-label.is-replay {opacity:1;fill:var(--ink)}
+.sysd-canvas.has-focus .sysd-n:not(.is-path),.sysd-canvas.has-replay .sysd-n:not(.is-replay):not(.is-replayed) {opacity:.22}
+.sysd-canvas.has-focus .sysd-e:not(.is-path) .sysd-e-line,.sysd-canvas.has-replay .sysd-e:not(.is-replay):not(.is-replayed) .sysd-e-line {opacity:.1}
+.sysd-canvas.has-focus .sysd-e-label.is-shown:not(.is-path) {opacity:.15}
+.sysd-n.is-path:not(.is-sel) .sysd-n-box {stroke:color-mix(in srgb,var(--plum) 60%,var(--line))}
+.sysd-e.is-path .sysd-e-line,.sysd-e.is-replay .sysd-e-line {stroke:var(--plum);opacity:1;stroke-width:2.2;marker-end:url(#sysd-arr-hi)}
+.sysd-e.is-replayed .sysd-e-line {stroke:var(--plum);opacity:.45}
+.sysd-n.is-replay .sysd-n-box {stroke:var(--plum);stroke-width:2.4}
+.sysd-canvas.has-filter .sysd-n.is-out {opacity:.12} .sysd-canvas.has-filter .sysd-e.is-out .sysd-e-line {opacity:.06}
+.sysd-canvas.has-filter .sysd-n.is-match .sysd-n-box {stroke:var(--plum)}
+.sysd-pulse {fill:var(--plum);stroke:var(--inset);stroke-width:3;pointer-events:none}
+.sysd-canvas:not(.has-replay) .sysd-pulse {display:none}
+.sysd-zoom {position:absolute;top:10px;right:10px;display:flex;flex-direction:column;border:1px solid var(--rule-strong);border-radius:8px;overflow:hidden;background:var(--surface)}
+.sysd-zoom button {border:0;border-bottom:1px solid var(--line);background:transparent;color:var(--ink);width:30px;height:28px;font-size:15px;cursor:pointer}
+.sysd-zoom button:last-child {border-bottom:0}
+.sysd-zoom button:hover {background:var(--select);color:var(--plum)}
+.sysd-minimap {position:absolute;right:10px;bottom:10px;width:156px;height:96px;border:1px solid var(--rule-strong);border-radius:8px;background:color-mix(in srgb,var(--surface) 92%,transparent);cursor:crosshair;overflow:hidden}
+.sysd-minimap-svg {width:100%;height:100%;display:block}
+.sysd-mm-grp {fill:none;stroke:var(--line);stroke-width:4}
+.sysd-mm-node {fill:var(--tier,var(--muted));opacity:.7} .sysd-mm-node.is-out {opacity:.15}
+.sysd-mm-view {fill:color-mix(in srgb,var(--plum) 12%,transparent);stroke:var(--plum);stroke-width:8}
+.sysd-tip {position:absolute;left:0;top:0;z-index:3;max-width:280px;pointer-events:none;display:flex;flex-direction:column;gap:2px;padding:8px 11px;border:1px solid var(--rule-strong);border-radius:8px;background:var(--raised);box-shadow:0 8px 24px rgba(0,0,0,.35);font-size:12px;line-height:1.4}
+.sysd-tip[hidden] {display:none}
+.sysd-tip strong {font-size:13px}
+.sysd-tip-tech {font-family:var(--mono);font-size:10.5px;color:var(--muted)}
+.sysd-tip-meta {color:var(--muted);display:flex;align-items:center}
+.sysd-replay-caption {position:absolute;left:10px;bottom:10px;right:178px;margin:0;font-size:13px;line-height:1.4}
+.sysd-replay-caption:not(:empty) {padding:7px 11px;border:1px solid var(--plum);border-radius:8px;background:color-mix(in srgb,var(--surface) 94%,transparent)}
+.sysd-replay-caption strong {color:var(--plum);margin-right:6px;font-variant-numeric:tabular-nums}
+/* Detail panel */
+.sysd-detail {border:1px solid var(--line);border-radius:12px;background:var(--surface);padding:14px 16px;position:sticky;top:12px;max-height:calc(100vh - 40px);overflow:auto}
+.sysd-detail h3 {margin:2px 0 4px;font-size:17px}
+.sysd-detail-kicker {display:flex;align-items:center;gap:6px;margin:0;font-family:var(--mono);font-size:11px;color:var(--muted)}
+.sysd-detail-kicker svg {width:14px;height:14px;flex:none}
+.sysd-detail p {font-size:13.5px;line-height:1.5}
+.sysd-facts dt {font-weight:650;margin-top:10px;font-size:12px;color:var(--muted);text-transform:uppercase;letter-spacing:.04em}
+.sysd-facts dd {margin:3px 0 0;font-size:13px;line-height:1.45;overflow-wrap:anywhere}
+.sysd-facts ul {list-style:none;margin:0;padding:0;display:grid;gap:3px}
+.sysd-drill {margin-top:12px}
+.sysd-gap {margin-top:14px;padding:10px 12px;border:1px dashed var(--rule-strong);border-radius:8px;font-size:12.5px;line-height:1.45}
+/* Legend */
+.sysd-legend {display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:12px 22px;margin-top:14px;padding:12px 16px;border:1px solid var(--line);border-radius:12px}
+.sysd-legend h4 {margin:0 0 6px;font-size:12px;color:var(--muted);text-transform:uppercase;letter-spacing:.05em}
+.sysd-legend ul {list-style:none;margin:0;padding:0;display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:4px 10px;font-size:12.5px}
+.sysd-legend li {display:flex;align-items:center;gap:7px}
+.sysd-legend li > svg {width:16px;height:16px;flex:none}
+.sysd-legend-edge > svg {width:44px!important;height:10px!important}
+.sysd-legend-box {width:18px;height:12px;border:1px dashed var(--rule-strong);border-radius:3px;flex:none}
+.sysd-legend-box.is-planned {border-style:dotted}
+/* Request flow */
+.sysd-sequence {width:100%;height:auto;display:block;border:1px solid var(--line);border-radius:12px;background:var(--inset)}
+.sysd-actor rect {fill:var(--surface);stroke:var(--rule-strong)}
+.sysd-actor text {fill:var(--ink);font-size:12.5px;font-weight:650}
+.sysd-actor .sysd-ico {stroke:var(--accent)}
+.sysd-actor line {stroke:var(--rule-strong);stroke-dasharray:4 4}
+.sysd-actor.is-off {opacity:.4}
+.sysd-actor .sysd-actor-off {font-size:10.5px;font-weight:400;fill:var(--muted)}
+.sysd-activation {fill:var(--select);stroke:var(--plum);stroke-width:1}
+.sysd-frame rect {fill:none;stroke:var(--rule-strong);stroke-width:1}
+.sysd-frame path {fill:none;stroke:var(--rule-strong)}
+.sysd-frame-op {font-size:11px;font-weight:700;fill:var(--ink);font-family:var(--mono)}
+.sysd-frame-guard {font-size:11px;fill:var(--muted);font-family:var(--mono)}
+.sysd-msg {fill:none;stroke:var(--ink);stroke-width:1.3;opacity:.75}
+.sysd-msg.is-return {stroke-dasharray:6 4}
+.sysd-msg-label {fill:var(--ink);font-size:12px;paint-order:stroke fill;stroke:var(--inset);stroke-width:4px;stroke-linejoin:round}
+.sysd-msg-hit {fill:transparent}
+.sysd-msg-g {cursor:pointer}
+.sysd-msg-g:hover .sysd-msg-hit,.sysd-msg-g:focus-visible .sysd-msg-hit {fill:color-mix(in srgb,var(--plum) 8%,transparent)}
+.sysd-msg-g:focus {outline:none}
+.sysd-msg-num {fill:var(--surface);stroke:var(--rule-strong)}
+.sysd-msg-numtext {font-size:10px;font-weight:700;fill:var(--muted)}
+.sysd-msg-g.is-active .sysd-msg {stroke:var(--plum);stroke-width:2.2;opacity:1}
+.sysd-msg-g.is-active .sysd-msg-num {fill:var(--plum);stroke:var(--plum)}
+.sysd-msg-g.is-active .sysd-msg-numtext {fill:var(--bg)}
+.sysd-msg-g.is-active .sysd-msg-hit {fill:color-mix(in srgb,var(--plum) 10%,transparent)}
+.sysd-msg-g.is-done .sysd-msg {stroke:var(--plum);opacity:.5}
+/* Data lineage */
+.sysd-lineage {position:relative;margin-top:8px}
+.sysd-lineage ol {list-style:none;margin:0;padding:0;display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:22px 40px;position:relative;z-index:1}
+.sysd-lineage-links {position:absolute;inset:0;width:100%;height:100%;pointer-events:none;z-index:0;overflow:visible}
+.sysd-lin-link {fill:none;stroke:var(--rule-strong);stroke-width:1.4;stroke-dasharray:11 4 2 4}
+.sysd-lin-link.is-path {stroke:var(--plum);stroke-width:2.2;stroke-dasharray:none}
+.sysd-hop {border:1px solid var(--line);border-left:3px solid var(--tier);border-radius:10px;background:var(--surface);padding:10px 12px;min-width:0;transition:opacity .18s ease}
+.sysd-lineage.has-focus .sysd-hop:not(.is-path) {opacity:.35}
+.sysd-hop.is-sel {border-color:var(--plum);border-left-color:var(--tier);box-shadow:0 0 0 1px var(--plum)}
+.sysd-hop-head {all:unset;cursor:pointer;display:flex;align-items:center;font-weight:650;font-size:13.5px;color:var(--ink)}
+.sysd-hop-head:focus-visible {outline:2px solid var(--plum);outline-offset:3px;border-radius:2px}
+.sysd-hop p {margin:6px 0 0;font-size:12.5px;line-height:1.45;overflow-wrap:anywhere}
+.sysd-hop-comp {margin-top:8px;font-size:12px}
+/* Checker */
+.sysd-checker {display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1.1fr);gap:20px;align-items:start}
+@media (max-width:1100px) {.sysd-checker {grid-template-columns:1fr}}
+.sysd-checker h3 {margin:0 0 8px;font-size:15px}
+.sysd-fact-table {width:100%;border-collapse:collapse;font-size:12.5px;margin-bottom:14px}
+.sysd-fact-table th,.sysd-fact-table td {text-align:left;padding:6px 8px;border-bottom:1px solid var(--line);vertical-align:top}
+.sysd-fact-table th {color:var(--muted);font-weight:600;font-size:11.5px}
+.sysd-label {display:block;font-size:12.5px;font-weight:650;margin-bottom:5px}
+.sysd-checker textarea {width:100%;box-sizing:border-box;font:inherit;font-size:14px;line-height:1.45;padding:9px 11px;background:var(--surface);color:var(--ink);border:1px solid var(--rule-strong);border-radius:8px;margin-bottom:8px;resize:vertical}
+.sysd-checker textarea:focus-visible {outline:2px solid var(--plum);outline-offset:1px}
+.sysd-rules {list-style:none;margin:0;padding:0;display:grid;gap:6px;counter-reset:rule}
+.sysd-rule {display:flex;gap:10px;align-items:flex-start;padding:8px 11px;border:1px solid var(--line);border-radius:8px;background:var(--surface)}
+.sysd-rule p {margin:2px 0 0}
+.sysd-rule-mark {flex:none;width:22px;height:22px;border-radius:50%;display:grid;place-items:center;font-size:12px;font-weight:700}
+.sysd-rule.is-pass .sysd-rule-mark {color:var(--sage);border:1px solid var(--sage)}
+.sysd-rule.is-fail {border-color:var(--rose)}
+.sysd-rule.is-fail .sysd-rule-mark {color:var(--bg);background:var(--rose)}
+.sysd-verdict {margin:10px 0 0;padding:10px 12px;border-radius:8px;font-size:13.5px}
+.sysd-verdict.is-pass {border:1px solid var(--sage);background:var(--sage-wash)}
+.sysd-verdict.is-fail {border:1px solid var(--rose);background:var(--rose-wash)}
+.sysd-passed {color:var(--sage)} .sysd-removed {color:var(--rose)}
+@media (prefers-reduced-motion:reduce) {
+  .sysd-n,.sysd-n-box,.sysd-e-line,.sysd-e-label,.sysd-hop {transition:opacity .12s linear}
+}
+
+/* ==========================================================================
+   Explore redesign · Catalog and Map (builder, November 13)
+   Scoped to Explore by José Pablo's decision ("scoped styles, flagged with a GitHub issue for Grish").
+   Uses existing tokens only; does not touch the provenance chip, data cell or design tokens (Grish #1-#4).
+   ========================================================================== */
+/* Catalog answer: answer card, then ranked records and investigations side by side, then report passages. */
+.catalog-answer-layout {grid-template-areas:"answer source" "records investigations" "passages passages"}
+.catalog-answer-layout:not(:has(.catalog-answer-source)) {grid-template-areas:"answer" "records" "investigations" "passages"}
+.catalog-answer-copy {padding:14px 18px;border:1px solid var(--line);border-radius:10px;background:var(--surface)}
+.catalog-answer-copy:empty {display:none}
+.catalog-answer-layout .catalog-ranked-list {display:grid;gap:6px;margin-top:9px}
+.catalog-answer-layout .catalog-ranked-row {
+  padding:10px 12px 10px 6px;border:1px solid var(--line);border-radius:8px;background:color-mix(in srgb,var(--surface) 70%,transparent);
+  transition:background-color .16s ease,border-color .16s ease;
+}
+.catalog-answer-layout .catalog-ranked-row:hover {border-color:color-mix(in srgb,var(--accent) 34%,var(--line));background:var(--surface)}
+.catalog-answer-layout .catalog-ranked-title {align-items:center;gap:4px 8px}
+.catalog-answer-layout .catalog-ranked-title .provenance-badge {order:0}
+.catalog-answer-layout .catalog-ranked-title > .text-action {font-size:14px}
+.catalog-investigation-row[data-reason-fold="closed"] .catalog-reason-text {
+  display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;
+}
+.catalog-reason-toggle {margin-top:3px;font-size:12px;color:var(--muted)}
+.catalog-reason-toggle:hover {color:var(--ink)}
+.catalog-answer-layout .report-passages {grid-area:passages;min-width:0;max-width:none;padding-top:14px;border-top:1px solid var(--line)}
+.catalog-answer-layout .report-passage-list {display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px clamp(16px,3vw,36px);margin-top:9px;padding-inline-start:1.2em}
+.catalog-answer-layout .report-passage[hidden] {display:none}
+.report-passages-more {margin-top:10px;font-size:12px}
+@media (max-width:900px) {
+  .catalog-answer-layout .report-passage-list {grid-template-columns:minmax(0,1fr)}
+}
+/* Map: labels carry a background halo so edges pass behind them. */
+.atlas-constellation :is(.atlas-domain-name,.scale-total,.atlas-root-name,.atlas-topic-map-name,.atlas-topic-map-count,.atlas-condition-label,.atlas-condition-count,.atlas-study-name,.atlas-study-caption) {
+  paint-order:stroke fill;stroke:var(--bg);stroke-width:5px;stroke-linejoin:round;
+}
+.atlas-constellation :is(.scale-total,.atlas-topic-map-count,.atlas-condition-count,.atlas-study-caption) {stroke-width:3.5px}
+/* Faded sibling areas show their mark only; the label returns on hover or focus. */
+.atlas-constellation .atlas-instrument-sector.is-context > .atlas-station :is(.atlas-domain-name,.scale-total) {opacity:0;transition:opacity .16s ease}
+.atlas-constellation .atlas-instrument-sector.is-context > .atlas-station:is(:hover,:focus-visible) :is(.atlas-domain-name,.scale-total) {opacity:1}
+/* Breadcrumb stays on one line; long crumbs truncate, the current place keeps the most room. */
+.atlas-chrome .atlas-trail {display:flex;align-items:center;gap:4px 14px;min-width:0}
+.atlas-chrome .atlas-breadcrumb {flex-wrap:nowrap;min-width:0;overflow:hidden;padding:3px;margin:-3px}
+.atlas-chrome .atlas-breadcrumb > :is(span:not([aria-hidden]),button:not(.atlas-back)) {
+  flex:0 1 auto;min-width:3ch;overflow:hidden;white-space:nowrap;text-overflow:ellipsis;
+}
+.atlas-chrome .atlas-breadcrumb > [aria-current="page"] {flex-shrink:.4;color:var(--ink)}
+.atlas-chrome .atlas-breadcrumb > [aria-hidden="true"] {flex:none}
+.atlas-chrome .atlas-trail > :not(.atlas-breadcrumb) {flex:none;white-space:nowrap}
+/* Explore redesign, deeper levels: at study and run level the breadcrumb carries the path, so the root and area labels step back. */
+.atlas-constellation.is-record-focus :is(.atlas-root-name,.atlas-area-open .atlas-domain-name,.atlas-area-open .scale-total) {opacity:0;transition:opacity .16s ease}
+.atlas-constellation.is-record-focus :is(.atlas-root,.atlas-area-open):is(:hover,:focus-visible) :is(.atlas-root-name,.atlas-domain-name,.scale-total) {opacity:1}
+.atlas-constellation .atlas-condition-junction-label .atlas-condition-junction-meta {font-weight:400;stroke-width:0}
 </style>
 </head>
 <body>
@@ -10426,12 +10645,15 @@ span.model-cite {cursor:default}
     const byField=wordText;
     const reason=[matched.length?(matched.length===1?'1 ranked run for this question: ':matched.length+' ranked runs for this question: ')+matched.map(investigationRunName).join(', ')+'.':'',
       ...facts,byField?(matched.length?'Also matches ':'Matches ')+byField+'.':''].filter(Boolean).join(' ');
-    return '<li class="catalog-ranked-row catalog-investigation-row"><span class="catalog-ranked-number" aria-hidden="true">'+String(index+1).padStart(2,'0')+'</span>'+
-      '<div><div class="catalog-ranked-title"><button type="button" class="text-action" data-act="catalog-investigation" data-investigation="'+profile.id+
+    // Long reasons fold to two lines; the full text stays in the row for screen readers and the checks.
+    const long=reason.length>150;
+    return '<li class="catalog-ranked-row catalog-investigation-row" data-flip-id="investigation:'+profile.id+'"'+(long?' data-reason-fold="closed"':'')+'><span class="catalog-ranked-number" aria-hidden="true">'+String(index+1).padStart(2,'0')+'</span>'+
+      '<div><div class="catalog-ranked-title">'+provenanceBadge('record','Catalogued from NASA’s PSI page')+'<button type="button" class="text-action" data-act="catalog-investigation" data-investigation="'+profile.id+
       '" aria-expanded="'+open+'" aria-controls="investigation-'+profile.id+'">'+escapeText(profile.name)+'</button>'+
       '<span class="catalog-ranked-relevance">'+investigationAreas(profile)+' · '+profile.id+
       (entry.criteria.length?' · Meets '+entry.met+' of '+entry.criteria.length:state.catalogMatches&&!matched.length?' · Related by description':'')+'</span></div>'+
-      criteriaLine+(reason?'<p class="catalog-ranked-reason">'+escapeText(reason)+'</p>':'')+
+      criteriaLine+(reason?'<p class="catalog-ranked-reason catalog-reason-text" id="reason-'+profile.id+'">'+escapeText(reason)+'</p>'+
+        (long?'<button type="button" class="text-action catalog-reason-toggle" data-act="catalog-reason-toggle" aria-controls="reason-'+profile.id+'" aria-expanded="false">Full reason</button>':''):'')+
       (entry.weaker?'<p class="catalog-ranked-weaker small">Ranked below '+escapeText(entry.weakerThan)+' because it '+escapeText(entry.weaker)+'.</p>':'')+(open?investigationProfile(profile):'')+'</div></li>';
   }
   // Keyword results and browsing: a compact investigation list above the runs table.
@@ -11428,8 +11650,7 @@ span.model-cite {cursor:default}
       '" transform="translate('+x+' '+y+')" role="img" aria-label="Shared conditions: PMMA, opposed flow">'+
       '<path class="atlas-condition-junction-leader" d="M8 0H25"/>'+
       '<path class="atlas-condition-junction-mark" d="M0-6l6 6-6 6-6-6z"/>'+
-      '<text class="atlas-condition-junction-meta" x="31" y="-1">Shared conditions</text>'+
-      '<text class="atlas-condition-junction-label" x="31" y="15">PMMA · opposed flow</text></g>';
+      '<text class="atlas-condition-junction-label" x="31" y="4"><tspan class="atlas-condition-junction-meta">Shared</tspan> PMMA · opposed flow</text></g>';
   }
 
   function atlasNasaFocus(study) {
@@ -11471,6 +11692,24 @@ span.model-cite {cursor:default}
   function atlasBassRelation() {
     if (!pairs.protocol.ids.includes(state.atlasRun)) return '';
     return conditionGroups.filter(([, ,includes])=>pairs.protocol.ids.every(includes)).map(([label])=>label).join(' · ');
+  }
+
+  // Long topic names wrap onto two lines upward so they stay clear of the first orbit (labels only; positions unchanged).
+  function atlasTopicMapName(name) {
+    // Break at the space that leaves the two lines closest in length.
+    const words=name.split(' ');
+    let lines=[name];
+    if (name.length>22&&words.length>1) {
+      let best=Infinity;
+      for (let i=1;i<words.length;i++) {
+        const pair=[words.slice(0,i).join(' '),words.slice(i).join(' ')];
+        const longest=Math.max(pair[0].length,pair[1].length);
+        if (longest<best) {best=longest;lines=pair;}
+      }
+    }
+    // Line spacing in em follows the zoom-compensated font size.
+    return '<text class="atlas-topic-map-name" x="-198" y="-62">'+lines.map((line,index)=>
+      '<tspan x="-198" dy="'+(index?'1.05em':(-(lines.length-1)*1.05)+'em')+'">'+escapeText(line)+'</tspan>').join('')+'</text>';
   }
 
   function atlasFamilyFocus(group) {
@@ -11528,7 +11767,7 @@ span.model-cite {cursor:default}
       '<circle class="atlas-orbit-topic-shadow" r="29"/><circle class="atlas-orbit-topic-ring" r="21"/>'+
       '<use class="foundry-atlas-mark" href="#foundry-glyph-'+(atlasFamilyGlyphs[group.key]||atlasDomainGlyph[group.domain])+
       '" x="-12" y="-12" width="24" height="24"/>'+
-      '<text class="atlas-topic-map-name" x="-198" y="-62">'+escapeText(group.name)+'</text>'+
+      atlasTopicMapName(group.name)+
       '<text class="atlas-topic-map-count" x="-198" y="-38">'+atlasCount(group.studies.length,'PSI investigation')+'</text>'+
       '<text class="atlas-topic-map-description" x="-198" y="43">'+escapeText(description)+'</text></g>'+
       bands+sources+'</g>';
@@ -11878,7 +12117,7 @@ span.model-cite {cursor:default}
         content.getAnimations().filter(animation=>animation.id==='atlas-tab-change').forEach(animation=>animation.cancel());
         content.animate([{transform:'translateX('+offset+'px)',opacity:.58},{transform:'none',opacity:1}],
           {id:'atlas-tab-change',duration:285,easing:'cubic-bezier(.2,.78,.24,1)'});
-      }
+      } else content.animate([{opacity:0},{opacity:1}],{id:'atlas-tab-change',duration:120});
     }
     if (focus) active.focus({preventScroll:true});
   }
@@ -12146,6 +12385,8 @@ span.model-cite {cursor:default}
     svg.dataset.atlasProjection='perspective';
     svg.classList.toggle('is-atlas-overview',!domain);
     svg.classList.toggle('is-family-focus',Boolean(domain));
+    // At study and run level the breadcrumb carries the path, so ancestor labels step back.
+    svg.classList.toggle('is-record-focus',Boolean(nasa));
     shell.dataset.atlasLayoutMode=state.atlasLayout;
     shell.querySelector('.atlas-chrome').innerHTML='<div class="atlas-toolbar"><div class="atlas-trail">'+
       (atlasBreadcrumb(domain,group,selected)||'<span>All studies</span><span class="atlas-overview-count"> · '+atlasCount(psiCatalog.summary.studyCount,'PSI investigation')+' · '+atlasCount(nasaAtlasStudies.length,'checked-record group')+'</span>'+
@@ -12486,7 +12727,8 @@ span.model-cite {cursor:default}
     const cameraShare=movesCamera?.36:0;
     const motion={viewport,next:null};
     const start=performance.now();
-    const duration=travel.duration??(travel.reverse?420:travel.key?.startsWith('topic:')?540:480);
+    // One glide of about 600 ms forward and 480 ms back (Explore redesign, November 13).
+    const duration=travel.duration??(travel.reverse?480:travel.key?.startsWith('topic:')?620:600);
     let mounted=false;
     atlasTravel=motion;
     viewport.dataset.traveling='true';
@@ -12494,6 +12736,10 @@ span.model-cite {cursor:default}
     viewport.dataset.atlasTravelKey=travel.key;
     viewport.dataset.atlasTravelMode=travel.mode||'browse';
     const ease=progress=>progress**3*(10+progress*(-15+6*progress));
+    // The inspector waits for the camera to land, then slides in.
+    const dock=viewport.closest('.unified-map')?.querySelector('.atlas-dock');
+    // The stylesheet's own entry animation would override the inline hide, so it is switched off for this panel.
+    if (dock?.firstElementChild) Object.assign(dock.firstElementChild.style,{animation:'none',opacity:'0'});
     function paint(progress) {
       if (progress<cameraShare) {
         viewport.dataset.atlasTravelPhase='camera';
@@ -12533,7 +12779,14 @@ span.model-cite {cursor:default}
       }
       for (const label of arrivingLabels) label.style.opacity=reveal;
       for (const label of movingLabels) label.style.opacity=1-clampAtlas(Math.sin(Math.PI*layout)*1.6,0,1);
-      exits.style.opacity=1-clampAtlas(branch/.12,0,1);
+      // Leaving branches fade and shrink in place instead of drifting off.
+      const leaving=clampAtlas(branch/.2,0,1);
+      exits.style.opacity=1-leaving;
+      for (const node of exits.children) {
+        if (!node.matches('g[transform]')) continue;
+        node.dataset.exitTransform??=node.getAttribute('transform');
+        node.setAttribute('transform',node.dataset.exitTransform+' scale('+(1-.18*leaving).toFixed(3)+')');
+      }
       placeAtlasEvidence(viewport);
     }
     function tick(now) {
@@ -12561,6 +12814,7 @@ span.model-cite {cursor:default}
       delete viewport.dataset.atlasTravelPhase;
       if (!tooltipPinned&&tooltipTrigger&&(!tooltipTrigger.isConnected||viewport.contains(tooltipTrigger))) closeGraphTooltip();
       atlasTravel=null;
+      exploreMotionDock(dock);
       if (motion.next) motion.next();
       else {
         travel.settled?.();
@@ -12569,6 +12823,37 @@ span.model-cite {cursor:default}
     }
     paint(0);
     requestAnimationFrame(tick);
+  }
+
+  // A short camera glide (d3.interpolateZoom) for button zoom and source framing. It stops as soon as
+  // anything else moves the camera (a drag, wheel or scene travel), so it never fights the user.
+  let atlasGlide=null;
+  function glideAtlasCamera(viewport,target,duration=300,done=null) {
+    const from=readAtlasCamera();
+    if (atlasGlide) cancelAnimationFrame(atlasGlide.frame);
+    atlasGlide=null;
+    const land=()=>{setAtlasCamera(viewport,target.zoom,target.x,target.y);updateAtlasCameraControls(viewport);done?.();};
+    if (!from||graphMotionOff.matches||!globalThis.d3?.interpolateZoom) {land();return;}
+    const vector=({x,y,zoom})=>[x+atlasWidth/zoom/2,y+atlasHeight/zoom/2,atlasWidth/zoom];
+    const path=globalThis.d3.interpolateZoom(vector(from),vector(target));
+    const ease=t=>1-(1-t)**3;
+    const box=viewport.querySelector('svg').viewBox.baseVal;
+    const glide={frame:0,last:null};
+    const start=performance.now();
+    const step=now=>{
+      if (atlasGlide!==glide||!viewport.isConnected||viewport.dataset.traveling) return;
+      if (glide.last&&(Math.abs(box.x-glide.last[0])>.01||Math.abs(box.y-glide.last[1])>.01)) {atlasGlide=null;return;}
+      const t=Math.min(1,(now-start)/duration);
+      if (t===1) {atlasGlide=null;land();return;}
+      const [cx,cy,width]=path(ease(t));
+      const zoom=atlasWidth/width;
+      setAtlasCamera(viewport,zoom,cx-width/2,cy-atlasHeight/zoom/2);
+      glide.last=[box.x,box.y];
+      updateAtlasCameraControls(viewport);
+      glide.frame=requestAnimationFrame(step);
+    };
+    atlasGlide=glide;
+    glide.frame=requestAnimationFrame(step);
   }
 
   function changeAtlasZoom(action,clientPoint=null) {
@@ -12593,8 +12878,13 @@ span.model-cite {cursor:default}
     const anchor=matrix?new DOMPoint(...clientPoint).matrixTransform(matrix.inverse()):
       new DOMPoint(box.x+box.width/2,box.y+box.height/2);
     const ratio=previous/next;
-    setAtlasCamera(viewport,next,anchor.x-(anchor.x-box.x)*ratio,anchor.y-(anchor.y-box.y)*ratio);
-    updateAtlasCameraControls(viewport);
+    const target={zoom:next,x:anchor.x-(anchor.x-box.x)*ratio,y:anchor.y-(anchor.y-box.y)*ratio};
+    // Buttons and keys glide; wheel and pinch stay direct so they track the hand.
+    if (typeof action!=='number') glideAtlasCamera(viewport,target,260);
+    else {
+      setAtlasCamera(viewport,target.zoom,target.x,target.y);
+      updateAtlasCameraControls(viewport);
+    }
     const percentage=Math.round(next*100);
     if (typeof action!=='number') announce('Atlas zoom '+percentage+' percent');
   }
@@ -12906,11 +13196,26 @@ span.model-cite {cursor:default}
     renderScaleMap(false,null,{key,settled:()=>focusAtlasInspector(true)});
   }
 
+  // Glide just far enough that the run's source sits in the lower third of the canvas, then sweep the trace.
+  function frameAtlasSource(id,then) {
+    const viewport=main.querySelector('.atlas-viewport');
+    const node=viewport?.querySelector('[data-atlas-key="source:'+CSS.escape(id)+':primary"]');
+    const camera=readAtlasCamera();
+    if (!node||!camera||viewport.dataset.traveling) {then();return;}
+    const [x,y]=atlasPosition(node);
+    const width=atlasWidth/camera.zoom, height=atlasHeight/camera.zoom;
+    const target={zoom:camera.zoom,
+      x:x<camera.x+width*.1||x>camera.x+width*.7?clampAtlas(x-width*.4,0,atlasWidth-width):camera.x,
+      y:clampAtlas(y-height*.68,0,atlasHeight-height)};
+    if (Math.abs(target.x-camera.x)<4&&Math.abs(target.y-camera.y)<4) {then();return;}
+    glideAtlasCamera(viewport,target,420,then);
+  }
+
   function openAtlasSource(id) {
     if (queueAtlasMove(()=>openAtlasSource(id))) return;
     if (state.atlasRun!==id) selectAtlasRun(id);
     if (id==='B1') setAtlasDetailTab('evidence');
-    traceAtlasSource();
+    frameAtlasSource(id,traceAtlasSource);
     const near=main.querySelector('.atlas-near-details');
     if (near) near.open=true;
     const source=main.querySelector('.atlas-run-source');
@@ -13519,8 +13824,8 @@ span.model-cite {cursor:default}
       const picker=canCompare&&compareOptions.includes(id)?'<label class="catalog-run-check">'+
         '<input type="checkbox" data-catalog-compare-run="'+id+'"'+(checked?' checked':compareCount===2?' disabled':'')+'>'+
         '<span class="sr-only">Select '+escapeText(name)+' for comparison</span></label>':'';
-      return '<li class="catalog-ranked-row"><span class="catalog-ranked-number" aria-hidden="true">'+String(index+1).padStart(2,'0')+'</span>'+
-        '<div><div class="catalog-ranked-title">'+picker+title+catalogOriginMark(mock?'psi':'nasa',id)+
+      return '<li class="catalog-ranked-row" data-flip-id="run:'+escapeText(id)+'"><span class="catalog-ranked-number" aria-hidden="true">'+String(index+1).padStart(2,'0')+'</span>'+
+        '<div><div class="catalog-ranked-title">'+picker+catalogOriginMark(mock?'psi':'nasa',id)+title+
         '<span class="catalog-ranked-relevance">'+escapeText(relevance)+'</span></div>'+
         '<p class="catalog-ranked-reason">'+escapeText(reason)+'</p></div><p class="catalog-ranked-locator">'+
         '<button type="button" class="text-action"'+trigger+' aria-label="Preview '+escapeText(source[0])+'" aria-pressed="'+(selected===sourceIndex)+'">Preview source</button></p></li>';
@@ -13536,11 +13841,11 @@ span.model-cite {cursor:default}
       '<button class="text-action" data-act="catalog-all" type="button">Browse catalog</button></div>'+
       '<div class="catalog-answer-layout"><div class="catalog-answer-copy">'+
       (paragraphs?'<div class="catalog-answer-findings">'+paragraphs+'</div>':'')+
-      (unanswerable?'<p class="catalog-answer-limit" data-unanswerable>'+escapeText(unanswerable.text)+'</p>':tableAnswer?'<p class="catalog-table-answer" data-table-answer>'+provenanceBadge('psi')+' '+escapeText(tableAnswer.text())+'</p>':question.gap?'<p class="catalog-answer-limit">'+escapeText(question.gap)+'</p>':'')+reportAnswerSection(state.prompt)+'</div>'+inspector+
+      (unanswerable?'<p class="catalog-answer-limit" data-unanswerable>'+escapeText(unanswerable.text)+'</p>':tableAnswer?'<p class="catalog-table-answer" data-table-answer>'+provenanceBadge('psi')+' '+escapeText(tableAnswer.text())+'</p>':question.gap?'<p class="catalog-answer-limit">'+escapeText(question.gap)+'</p>':'')+'</div>'+inspector+
       (rankedList?'<section class="catalog-answer-sources" aria-labelledby="catalog-ranked-title"><div class="catalog-ranked-heading">'+
         '<h3 id="catalog-ranked-title">Ranked records</h3>'+compareActions+'</div>'+
         '<ol class="catalog-ranked-list" role="list">'+rankedList+'</ol></section>':'')+
-      catalogInvestigationsSection(question)+'</div></section>';
+      catalogInvestigationsSection(question)+reportAnswerSection(state.prompt)+'</div></section>';
   }
 
   function catalogCriteriaBlock(entry) {
@@ -13578,8 +13883,10 @@ span.model-cite {cursor:default}
     const section=document.getElementById('catalog-answer-investigations');
     if (!section||!state.catalogMatches||!state.catalogTurn) return;
     const inner=catalogInvestigationsInner(state.catalogTurn.question);
-    section.innerHTML=inner;
-    section.hidden=!inner;
+    exploreMotionReorder(section,()=>{
+      section.innerHTML=inner;
+      section.hidden=!inner;
+    });
   }
   async function readQuestionCriteria(prompt) {
     const set=entry=>{
@@ -14059,11 +14366,11 @@ span.model-cite {cursor:default}
     if (!results.length) return '';
     return '<section class="report-passages" aria-labelledby="report-passages-title"><h3 id="report-passages-title">From NASA reports</h3>'+
       '<p class="small muted">'+provenanceBadge('report')+' Passages ranked by matching words. Read them in the report before relying on them.</p>'+
-      '<ol class="report-passage-list">'+results.map(result=>'<li class="report-passage" data-report-page="'+escapeText(result.doc+':'+result.page)+'">'+
+      '<ol class="report-passage-list">'+results.map((result,index)=>'<li class="report-passage" data-report-page="'+escapeText(result.doc+':'+result.page)+'"'+(index>=2?' data-passage-extra hidden':'')+'>'+
         '<p class="small"><strong>'+escapeText(result.info?.name||result.doc)+'</strong> · '+
         link([(result.info?.name||result.doc)+' · PDF p. '+result.page,(result.info?.url||'')+'#page='+result.page],'PDF page '+result.page)+
         (result.table?' · table page':'')+'</p><p class="report-passage-text">'+reportSnippet(result.text,result.terms)+'</p></li>').join('')+
-      '</ol></section>';
+      '</ol>'+(results.length>2?'<button type="button" class="text-action report-passages-more" data-act="report-passages-more" aria-expanded="false">Show '+(results.length-2)+' more '+(results.length===3?'passage':'passages')+'</button>':'')+'</section>';
   }
 
   if (/[?&]harvest\b/.test(location.search)) window.__flaregrainReportSearch=reportSearch;
@@ -15510,6 +15817,109 @@ span.model-cite {cursor:default}
     return {text,cites:[...known,...added],problems:reasons};
   }
 
+  // Explore motion (Catalog and Map). One interruptible GSAP timeline at a time; transform and opacity only.
+  // Reduced motion keeps a 120 ms opacity fade so changes stay noticeable without movement.
+  // Decided with José Pablo on November 13: answer, ranked, then passages; camera glide plus fade on the Atlas.
+  let exploreMotionActive=null;
+  const exploreMotionReady=()=>Boolean(window.gsap);
+  const exploreMotionSettle=()=>{
+    if (exploreMotionActive) exploreMotionActive.progress(1).kill();
+    exploreMotionActive=null;
+  };
+  const exploreMotionList=targets=>[...(targets||[])].filter(node=>node?.isConnected);
+
+  // Reveal groups in sequence: each group starts 60 ms after the one before and staggers its own items.
+  function exploreMotionReveal(groups) {
+    exploreMotionSettle();
+    const stages=groups.map(exploreMotionList).filter(group=>group.length);
+    if (!stages.length||!exploreMotionReady()) return;
+    if (graphMotionOff.matches) {
+      exploreMotionActive=window.gsap.fromTo(stages.flat(),{opacity:0},{opacity:1,duration:.12,ease:'none',clearProps:'opacity'});
+      return;
+    }
+    const timeline=window.gsap.timeline({defaults:{duration:.3,ease:'power3.out'},onComplete:()=>{exploreMotionActive=null;}});
+    stages.forEach((group,index)=>timeline.fromTo(group,{opacity:0,y:10},
+      {opacity:1,y:0,stagger:Math.min(.03,.15/group.length),clearProps:'opacity,transform'},index?'<0.06':0));
+    exploreMotionActive=timeline;
+  }
+
+  // A short fade for content swapped in place (source preview, table page, opened profile).
+  function exploreMotionFade(target,rise=0) {
+    const nodes=exploreMotionList(target instanceof Element?[target]:target);
+    if (!nodes.length||!exploreMotionReady()) return;
+    const still=graphMotionOff.matches||!rise;
+    window.gsap.fromTo(nodes,{opacity:0,y:still?0:rise},{opacity:1,y:0,duration:still?.12:.24,ease:still?'none':'power2.out',clearProps:'opacity,transform'});
+  }
+
+  function exploreMotionAnswer() {
+    const answer=document.getElementById('catalog-answer');
+    if (!answer||answer.hidden) return;
+    exploreMotionReveal([
+      answer.querySelectorAll('.catalog-answer-head,.catalog-answer-copy,.catalog-answer-source'),
+      answer.querySelectorAll('.catalog-answer-sources .catalog-ranked-heading,.catalog-answer-investigations .catalog-ranked-heading,.catalog-criteria,.catalog-answer-layout .catalog-ranked-row'),
+      answer.querySelectorAll('.report-passages')
+    ]);
+  }
+
+  function exploreMotionPane() {
+    const content=main.firstElementChild;
+    if (!content) return;
+    // The Atlas runs its own camera; only fade its chrome so the canvas never jumps.
+    if (content.classList.contains('unified-map')) {
+      exploreMotionReveal([content.querySelectorAll('.atlas-chrome'),content.querySelectorAll('.atlas-canvas,.atlas-dock')]);
+      return;
+    }
+    exploreMotionReveal([[content]]);
+  }
+
+  // Investigations re-order when the model's criteria arrive: rows slide to their new rank.
+  function exploreMotionReorder(section,update) {
+    const rows=()=>section.querySelectorAll('[data-flip-id]');
+    exploreMotionSettle();
+    if (!exploreMotionReady()||!window.Flip||!rows().length) {
+      update();
+      exploreFitReasons(section);
+      exploreMotionFade(section);
+      return;
+    }
+    if (graphMotionOff.matches) {
+      update();
+      exploreFitReasons(section);
+      exploreMotionFade(section);
+      return;
+    }
+    window.gsap.registerPlugin(window.Flip);
+    const before=window.Flip.getState(rows());
+    update();
+    exploreFitReasons(section);
+    window.Flip.from(before,{targets:rows(),duration:.45,ease:'power2.inOut',
+      onEnter:items=>window.gsap.fromTo(items,{opacity:0},{opacity:1,duration:.24,clearProps:'opacity'})});
+    exploreMotionFade(section.querySelectorAll('.catalog-criteria,.catalog-ranked-heading'));
+  }
+
+  // The Atlas inspector slides in once the camera has landed.
+  function exploreMotionDock(dock) {
+    const panel=dock?.firstElementChild;
+    if (!panel) return;
+    panel.style.removeProperty('opacity');
+    if (!exploreMotionReady()) return;
+    if (graphMotionOff.matches) {
+      window.gsap.fromTo(panel,{opacity:0},{opacity:1,duration:.12,ease:'none',clearProps:'opacity'});
+      return;
+    }
+    window.gsap.fromTo(panel,{opacity:0,x:14},{opacity:1,x:0,duration:.26,ease:'power2.out',clearProps:'opacity,transform'});
+  }
+
+  // Keep the two-line fold only where the reason actually overflows; otherwise drop the toggle.
+  function exploreFitReasons(root=main) {
+    for (const row of root.querySelectorAll('[data-reason-fold="closed"]')) {
+      const text=row.querySelector('.catalog-reason-text');
+      if (!text||text.scrollHeight>text.clientHeight+1) continue;
+      row.removeAttribute('data-reason-fold');
+      row.querySelector('.catalog-reason-toggle')?.remove();
+    }
+  }
+
   // The Compare page asks a local model for a short comparison on request. Nothing leaves this computer.
   // Where the model runs. Default: this computer. Open the page with ?model=http://<Mac Mini Tailscale IP>:11434 to use the Mac Mini's model
   // over Tailscale (remembered in this browser; ?model=local goes back). Only this computer and Tailscale addresses
@@ -16586,7 +16996,10 @@ span.model-cite {cursor:default}
     inspector.parentElement.hidden=graphRanking.hidden&&inspector.hidden;
     renderGuide();
     document.querySelector('.toolbar-guide').hidden=state.guide!==null||(exploring&&state.explorePane==='catalog'&&!state.exploreStarted);
-    if (exploring) renderExplore(camera);
+    if (exploring) {
+      renderExplore(camera);
+      exploreFitReasons();
+    }
     else renderers[state.view]();
     renderInspector();
     renderResearchContext();
@@ -16598,10 +17011,11 @@ span.model-cite {cursor:default}
     updateAskScope();
   }
 
-
-  // ---- System design (top navigation). How Flaregrain is built today, layer by layer, drawn as Mermaid-style SVG from one
-  // description (archLayers / archEdges below). Counts are read live from the data embedded in this page. A dashed
-  // "Not built yet" layer keeps planned parts apart from what runs. Structure only: styling is scoped to .sysd-* and
+  // ---- System design (top navigation). How Flaregrain is built today, documented the way engineering teams publish systems:
+  // C4 levels (context → containers → components) on one pan-and-zoom canvas, a UML request sequence, the lineage of single
+  // values, the checker's rules run live, and a deployment view. Every view is drawn from one description (archLayers,
+  // archEdges, sysdMeta below); counts are read live from the data in this page. A dashed "Not built yet" layer keeps planned
+  // parts apart from what runs. Styling is scoped to .sysd-* (José Pablo, November 13); Grish restyles on top (issue #9).
   // left for Grish to restyle (lane map in AGENTS.md).
   const archLayers=[
     {id:'sources',title:'NASA sources',nodes:[
@@ -16661,148 +17075,842 @@ span.model-cite {cursor:default}
       {id:'store',label:'Review store',what:'A database of sources, pinned versions, evidence, claims and reviews. Today review state lives in JSON files and git history.',files:[],out:'',count:()=>'Planned',checks:[]},
       {id:'review',label:'Two-person review',what:'Disputed claims approved by two independent reviewers before they are served. Today Osman second-reads by hand (issue #5).',files:[],out:'',count:()=>'Planned',checks:[]}]}
   ];
-  const archEdges=[['psi-api','intake'],['psi-csv','intake'],['intake','observe'],['second','observe'],['reports','corpus'],
-    ['observe','catalog'],['observe','issues'],['observe','trends'],['corpus','passages'],
-    ['catalog','rank'],['passages','bm25'],['criteria','rank'],['checked','explain'],['catalog','explain'],
-    ['explain','checker'],['saved','checker'],['checker','tiers'],
-    ['rank','views'],['bm25','views'],['trends','views'],['issues','views'],['tiers','views'],['page','views'],['page','public'],['checks','page']];
+  // Per component: C4 element type (drives the icon), technology line and provenance tier (drives the colour).
+  const sysdMeta={
+    'psi-api':['external','NASA PSI · JSON over HTTPS','psi'],'psi-csv':['table','CSV files · hashed','psi'],
+    checked:['record','JSON · hand-checked','checked'],reports:['doc','PDF · SHA-256','checked'],
+    intake:['script','Python 3 · stdlib','psi'],second:['record','JSON · team-edited','checked'],
+    observe:['script','Python 3 · stdlib','psi'],corpus:['script','Python 3 · model host','checked'],
+    catalog:['data','JSON block in page','psi'],issues:['data','JSON block in page','psi'],
+    trends:['model','Python fit → JSON block','model'],passages:['data','JSON block in page','checked'],
+    criteria:['model','qwen3:4b · Ollama · JSON schema','model'],rank:['search','JavaScript · in page','context'],
+    explain:['model','qwen3:4b · Ollama · temp 0','model'],saved:['data','JSON block · facts fingerprint','model'],
+    bm25:['search','JavaScript · BM25','checked'],checker:['checker','JavaScript · checkSentence()','context'],
+    tiers:['badge','JavaScript · provenanceBadge()','context'],views:['view','HTML · JavaScript · SVG','context'],
+    page:['script','Python 3 · build_page.py','context'],public:['deploy','Static HTML · GitHub Pages','context'],
+    checks:['test','Node · headless browser','context'],api:['api','Service · not built','planned'],
+    store:['data','Database · not built','planned'],review:['person','Workflow · not built','planned']};
+  // Per layer (a C4 container): technology, one-line role, live count and the team's own reading of its limits.
+  const sysdLayerMeta={
+    sources:{tech:'External · NASA',type:'external',what:'NASA’s PSI repository, its experimental tables, the cited technical reports and the records the team checked by hand.',
+      count:()=>psiCatalog.studies.length+' investigations · '+Object.keys(reportData.docs).length+' reports',
+      gap:'24 of 38 image-only report pages have no text; OCR recovered 14 but is not adopted until it is labelled.'},
+    intake:{tech:'Python 3 · stdlib · build time',type:'script',what:'Fetches and hashes NASA files, then splits every table cell into an observation with its locator and flags.',
+      count:()=>psiIssues.flagged_values+' values flagged',
+      gap:'Second readings exist as a file but are empty; three numbers from teammates are unverified until Osman reads them (issue #5).'},
+    data:{tech:'JSON blocks embedded in the page',type:'data',what:'The catalog, profiles, issues, passages and trend models the page carries, so it works offline.',
+      count:()=>psiCatalog.runs.length.toLocaleString('en')+' rows · '+reportData.passages.length.toLocaleString('en')+' passages',
+      gap:'Pressure is missing on many PSI rows, so the Habitat explorer places them on an oxygen-only strip.'},
+    retrieval:{tech:'JavaScript in page · local model (optional)',type:'search',what:'Ranks investigations with rules, searches report passages and asks the local model for criteria and comparison sentences.',
+      count:()=>'hit@1 0.759 rules · 0.861 with model',
+      gap:'Report search lets the 2015 Researcher’s Guide crowd out investigation reports (issue #7). Trend models are small fits; CFI-G ignition barely beats its base rate.'},
+    check:{tech:'JavaScript in page',type:'checker',what:'Removes any model sentence it cannot trace to a NASA field, and gives every line on screen its provenance badge.',
+      count:()=>Object.keys(savedExplanations.explanations||{}).length+' saved pairs passed',
+      gap:'It checks numbers and words against fields, not meaning; a sentence can pass and still read oddly.'},
+    interface:{tech:'Static HTML · GitHub Pages',type:'view',what:'Builds one self-contained page, runs the checks against it and publishes the public build.',
+      count:()=>'5 destinations · 22 checks · 2 journeys',
+      gap:'The public build uses saved explanations only; a pair with no saved explanation shows no model sentences.'},
+    planned:{tech:'Not built yet',type:'api',what:'A hosted evidence API, a review store and two-person review. Today everything runs inside one page.',
+      count:()=>'Planned',gap:'No hosted API or review database; review state lives in files and git.'}};
+  // Flows between components: [from, to, kind, label]. sync = call inside the page, async = model call over HTTP,
+  // build = runs before the page exists, planned = not built.
+  const archEdges=[
+    ['psi-api','intake','build','Investigation records over HTTPS'],['psi-csv','intake','build','CSV tables, hashed'],
+    ['intake','observe','build','data/raw and manifest'],['second','observe','build','Second-read values'],
+    ['reports','corpus','build','Hashed PDFs'],['observe','catalog','build','Observations'],['observe','issues','build','Flags'],
+    ['observe','trends','build','Observations'],['corpus','passages','build','Page chunks'],
+    ['catalog','rank','sync','Rows and profiles'],['passages','bm25','sync','Passages'],
+    ['views','criteria','async','Question text'],['criteria','rank','async','Criteria (JSON schema)'],
+    ['checked','explain','sync','Checked facts'],['catalog','explain','sync','PSI row facts'],
+    ['explain','checker','async','Sentences citing fact IDs'],['saved','checker','sync','Saved sentences'],
+    ['checker','tiers','sync','Sentences that passed'],['rank','views','sync','Ranked investigations'],
+    ['bm25','views','sync','Passages with PDF pages'],['trends','views','sync','Model curves'],['issues','views','sync','Flagged values'],
+    ['tiers','views','sync','Badged lines'],['page','views','build','One HTML file'],['page','public','build','data-build="public"'],
+    ['checks','page','build','Regression checks and journeys'],
+    ['views','api','planned','Questions'],['api','store','planned','Claims and evidence'],['review','store','planned','Approvals']];
   const archNode=id=>archLayers.flatMap(layer=>layer.nodes.map(node=>({...node,layer}))).find(node=>node.id===id);
+  const sysdKinds={sync:'In-page call',async:'Model call over HTTP',build:'Build time, before the page exists',planned:'Planned, not built'};
+  const sysdTierNames={checked:'NASA source or checked record',psi:'PSI table data',model:'Flaregrain model or reading',context:'Tooling and interface',planned:'Not built yet'};
+  // 16-unit stroke icons, one per element type.
+  const sysdIcons={
+    external:'M8 1.5a6.5 6.5 0 1 0 .01 0M1.5 8h13M8 1.5c2.2 2 2.2 11 0 13M8 1.5c-2.2 2-2.2 11 0 13',
+    table:'M1.5 2.5h13v11h-13zM1.5 6h13M1.5 9.5h13M6 2.5v11',doc:'M3 1.5h7l3 3v10H3zM10 1.5v3h3M5.5 8h5M5.5 11h5',
+    record:'M3 1.5h10v13H3zM5.5 5l1.4 1.4L9.5 3.8M5.5 10h5M5.5 12.5h3.5',
+    script:'M5.5 4 2 8l3.5 4M10.5 4 14 8l-3.5 4M9 2.5 7 13.5',data:'M2 4c0-2.7 12-2.7 12 0s-12 2.7-12 0zM2 4v8c0 2.7 12 2.7 12 0V4M2 8c0 2.7 12 2.7 12 0',
+    model:'M8 1.5 9.6 6.4 14.5 8l-4.9 1.6L8 14.5 6.4 9.6 1.5 8l4.9-1.6z',search:'M7 2.5a4.5 4.5 0 1 0 .01 0M10.3 10.3 14 14',
+    checker:'M8 1.5 14 4v4c0 3.4-2.6 5.7-6 6.5C4.6 13.7 2 11.4 2 8V4zM5.2 8l2 2 3.6-3.8',
+    badge:'M2 8.5 7.5 3H14v6.5L8.5 15zM10.8 5.2h.01',view:'M1.5 2.5h13v11h-13zM1.5 5.5h13M4 2.5v3',
+    deploy:'M4 12.5h8.5a3 3 0 0 0-.4-6A4.2 4.2 0 0 0 4 7.2a2.7 2.7 0 0 0 0 5.3zM8 7v5M6 9l2-2 2 2',
+    test:'M2 4l1.6 1.6L6.5 2.5M8.5 4H14M2 11l1.6 1.6 2.9-3.1M8.5 11H14',person:'M8 1.5a3 3 0 1 0 .01 0M2.5 14.5c0-3.6 2.5-5.5 5.5-5.5s5.5 1.9 5.5 5.5',
+    api:'M5 1.5v4M11 1.5v4M3 5.5h10v3a5 5 0 0 1-10 0zM8 13.5v1.5',system:'M1.5 3h13v8h-13zM5 14h6M8 11v3',
+    laptop:'M3 3h10v7.5H3zM1 13h14',server:'M2 2h12v5H2zM2 9h12v5H2zM4.5 4.5h1M4.5 11.5h1'};
+  const sysdIconNames={external:'External system',table:'Table files',doc:'Report',record:'Hand-edited record',script:'Script',data:'Data block or store',
+    model:'Model',search:'Ranking or search',checker:'Checker',badge:'Badges',view:'Interface',deploy:'Hosting',test:'Checks',person:'Person',api:'Service',system:'Software system'};
+  const sysdMotionOff=matchMedia('(prefers-reduced-motion: reduce)');
+  const sysdMotion=()=>!sysdMotionOff.matches&&typeof gsap!=='undefined';
+  const sysdS=()=>state.sysd||(state.sysd={view:'architecture',level:'component',selected:'',search:'',hidden:[],flow:publicBuild?'public':'local',flowStep:-1,
+    lineage:'b1',hop:'',checkText:'',rule:'',replay:'local',replayStep:-1,playing:false});
+  const sysdEsc=value=>escapeText(String(value??''));
+  const sysdClip=(text,chars)=>{ text=String(text||''); return text.length>chars?text.slice(0,Math.max(1,chars-1)).trimEnd()+'…':text; };
+  const sysdWrap=(text,chars,max)=>{ const lines=[''];
+    String(text||'').split(' ').forEach(word=>{ const line=lines.at(-1); if ((line+' '+word).trim().length>chars&&line) lines.push(word); else lines[lines.length-1]=(line+' '+word).trim(); });
+    return lines.length>max?[...lines.slice(0,max-1),sysdClip(lines.slice(max-1).join(' '),chars)]:lines; };
+  const sysdCount=fn=>{ try { return String(fn()); } catch { return ''; } };
 
-  // Mermaid-style flowchart: one band per layer, rounded nodes, curved arrows. Nodes are keyboard buttons.
-  function archDiagram(selected) {
-    const W=1120,band=104,top=8,nodeH=46,left=150;
-    const pos=new Map();
-    archLayers.forEach((layer,li)=>{
-      const n=layer.nodes.length, gap=(W-left-20)/n;
-      layer.nodes.forEach((node,ni)=>pos.set(node.id,{x:left+gap*ni+gap/2,y:top+li*band+band/2,w:Math.min(176,gap-18)}));
+  // ---- Graphs. Every view is one description: nodes with boxes, optional groups (C4 boundaries or deployment nodes), edges.
+  const sysdColumns=[['sources',{'psi-api':0,'psi-csv':1,checked:2.5,reports:4}],['intake',{intake:0,second:1,observe:2.2,corpus:4}],
+    ['data',{catalog:1,issues:2,trends:3,passages:4}],['retrieval',{criteria:0,rank:1,explain:2.4,saved:3.4,bm25:4.5}],
+    ['check',{checker:2.8,tiers:4}],['interface',{checks:0.4,views:2,page:3.3,public:4.5}]];
+  function sysdComponentGraph() {
+    const colW=240,nodeW=196,nodeH=76,slot=98,top=56,left=34;
+    const nodes=[],groups=[];
+    const add=(node,layer,x,y,col)=>{ const [type,tech,tier]=sysdMeta[node.id]||['data','','context'];
+      nodes.push({id:node.id,x,y,w:nodeW,h:nodeH,col,label:node.label,tech,type,tier,group:layer.id,planned:!!layer.planned,count:sysdCount(node.count),
+        search:[node.label,node.what,tech,layer.title,...(node.files||[])].join(' ')}); };
+    const bottom=top+4.5*slot+nodeH+18;
+    sysdColumns.forEach(([layerId,rows],col)=>{
+      const layer=archLayers.find(item=>item.id===layerId), x=left+col*colW;
+      groups.push({id:layerId,x:x-14,y:16,w:nodeW+28,h:bottom-16,title:layer.title,sub:sysdLayerMeta[layerId].tech});
+      layer.nodes.forEach(node=>add(node,layer,x,top+rows[node.id]*slot,col));
     });
-    const wrap=(text,width)=>{ const words=text.split(' '), lines=['']; words.forEach(word=>{ const line=lines.at(-1); if ((line+' '+word).trim().length*7>width&&line) lines.push(word); else lines[lines.length-1]=(line+' '+word).trim(); }); return lines.slice(0,2); };
-    const bands=archLayers.map((layer,li)=>'<g class="sysd-band'+(layer.planned?' is-planned':'')+'"><rect x="4" y="'+(top+li*band+4)+'" width="'+(W-8)+'" height="'+(band-8)+'" rx="10"/>'+
-      '<text x="18" y="'+(top+li*band+band/2+4)+'" class="sysd-band-label">'+escapeText(layer.title)+'</text></g>').join('');
-    const edges=archEdges.map(([from,to])=>{
-      const a=pos.get(from), b=pos.get(to); if (!a||!b) return '';
-      const lit=selected&&(from===selected||to===selected);
-      if (a.y===b.y) {
-        const dir=b.x>a.x?1:-1, x1=a.x+dir*a.w/2, x2=b.x-dir*(b.w/2+3);
-        return '<path class="sysd-edge'+(lit?' is-lit':'')+'" d="M'+x1.toFixed(1)+' '+a.y+' L'+x2.toFixed(1)+' '+b.y+'" marker-end="url(#sysd-arrow'+(lit?'-lit':'')+')"/>';
-      }
-      const y1=a.y+nodeH/2, y2=b.y-nodeH/2, mid=(y1+y2)/2;
-      return '<path class="sysd-edge'+(lit?' is-lit':'')+'" d="M'+a.x.toFixed(1)+' '+y1+' C'+a.x.toFixed(1)+' '+mid+' '+b.x.toFixed(1)+' '+mid+' '+b.x.toFixed(1)+' '+(y2-3)+'" marker-end="url(#sysd-arrow'+(lit?'-lit':'')+')"/>';
-    }).join('');
-    const nodes=archLayers.flatMap(layer=>layer.nodes.map(node=>{
-      const p=pos.get(node.id), lines=wrap(node.label,p.w-16);
-      return '<g class="sysd-node'+(layer.planned?' is-planned':'')+(node.id===selected?' is-selected':'')+'" data-arch-node="'+node.id+'" role="button" tabindex="0" aria-pressed="'+(node.id===selected)+'" aria-label="'+escapeText(node.label+', '+layer.title)+'">'+
-        '<rect x="'+(p.x-p.w/2).toFixed(1)+'" y="'+(p.y-nodeH/2)+'" width="'+p.w.toFixed(1)+'" height="'+nodeH+'" rx="8"/>'+
-        lines.map((line,i)=>'<text x="'+p.x.toFixed(1)+'" y="'+(p.y+4+(i-(lines.length-1)/2)*14).toFixed(1)+'" text-anchor="middle">'+escapeText(line)+'</text>').join('')+'</g>';
-    })).join('');
-    const H=top+archLayers.length*band+8;
-    return '<svg class="sysd-diagram" viewBox="0 0 '+W+' '+H+'" role="group" aria-label="Flaregrain architecture, seven layers from NASA sources to delivery">'+
-      '<defs><marker id="sysd-arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0 0 L10 5 L0 10 z" class="sysd-arrowhead"/></marker>'+
-      '<marker id="sysd-arrow-lit" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0 0 L10 5 L0 10 z" class="sysd-arrowhead is-lit"/></marker></defs>'+
-      bands+edges+nodes+'</svg>';
+    const planned=archLayers.find(layer=>layer.planned), py=bottom+48;
+    groups.push({id:'planned',x:left+2*colW-14,y:py-40,w:2*colW+nodeW+28,h:nodeH+58,title:planned.title,sub:'Dashed: not built',planned:true});
+    [['review',2],['store',3],['api',4]].forEach(([id,col])=>add(planned.nodes.find(node=>node.id===id),planned,left+col*colW,py,null));
+    return {key:'component',W:left+6*colW-10,H:py+nodeH+30,nodes,groups,edges:archEdges.map(([from,to,kind,label])=>({from,to,kind,label,loop:from==='views'&&kind==='async'})),labels:false,
+      title:'Component view: 26 parts in 7 layers'};
   }
-  function archDetail(id) {
-    const node=archNode(id);
-    if (!node) return '<p class="muted">Select a box in the diagram to see what it does, its files, what goes in and out, live counts and the checks that cover it.</p>';
-    const ins=archEdges.filter(([, to])=>to===id).map(([from])=>archNode(from)?.label).filter(Boolean);
-    const outs=archEdges.filter(([from])=>from===id).map(([, to])=>archNode(to)?.label).filter(Boolean);
+  const sysdContainerIds=['intake','data','retrieval','check','interface'];
+  function sysdContainerGraph() {
+    const nodes=[],w=188,h=196,y=226,X=i=>272+i*246;
+    const layerOf=id=>archLayers.find(layer=>layer.nodes.some(node=>node.id===id))?.id;
+    const cid=layer=>layer==='sources'?'c-sources':'c-'+layer;
+    const sources=sysdLayerMeta.sources;
+    nodes.push({id:'c-sources',x:20,y,w:210,h,label:'NASA sources',tech:'External systems',type:'external',tier:'psi',shape:'external',
+      desc:sources.what,count:sysdCount(sources.count),drill:'sources',search:'NASA sources PSI reports checked records'});
+    sysdContainerIds.forEach((id,i)=>{ const layer=archLayers.find(item=>item.id===id), meta=sysdLayerMeta[id];
+      nodes.push({id:'c-'+id,x:X(i),y,w,h,label:layer.title,tech:meta.tech,type:meta.type,tier:id==='retrieval'?'model':id==='intake'||id==='data'?'psi':'context',
+        desc:meta.what,count:layer.nodes.length+' parts · '+sysdCount(meta.count),drill:id,search:layer.title+' '+meta.what+' '+meta.tech}); });
+    nodes.push({id:'c-planned',x:X(2),y:520,w:434,h:124,label:'Not built yet',tech:'Planned containers',type:'api',tier:'planned',planned:true,
+      desc:sysdLayerMeta.planned.what,count:'3 planned components',drill:'planned',search:'planned api review store'});
+    nodes.push({id:'c-user',x:X(4),y:36,w,h:120,label:'Visitor',tech:'Person',type:'person',tier:'context',shape:'person',
+      desc:'A judge or researcher who asks, compares and traces.',search:'person user judge researcher'});
+    nodes.push({id:'c-model',x:X(2),y:36,w,h:120,label:'Local model',tech:'Ollama · qwen3:4b',type:'model',tier:'model',shape:'external',
+      desc:'Off in the public build.',count:publicBuild?'Off in this build':'Model '+modelPlace,search:'model ollama qwen'});
+    nodes.push({id:'c-pages',x:X(4),y:520,w,h:124,label:'GitHub Pages',tech:'Static hosting',type:'deploy',tier:'context',shape:'external',
+      desc:'Serves the public build to judges.',search:'github pages hosting public'});
+    const pairs=new Map();
+    archEdges.forEach(([from,to,kind])=>{ const a=cid(layerOf(from)), b=cid(layerOf(to)); if (a===b) return;
+      const key=a+'>'+b, item=pairs.get(key)||{from:a,to:b,n:0,kinds:new Set()}; item.n++; item.kinds.add(kind); pairs.set(key,item); });
+    const edges=[];
+    pairs.forEach(item=>{ if (pairs.has(item.to+'>'+item.from)&&item.from>item.to) return;
+      const both=pairs.get(item.to+'>'+item.from), kinds=new Set([...item.kinds,...(both?.kinds||[])]);
+      const kind=kinds.has('planned')?'planned':kinds.has('async')?'async':kinds.has('sync')?'sync':'build';
+      edges.push({from:item.from,to:item.to,kind,both:!!both,label:(item.n+(both?.n||0))+' flow'+((item.n+(both?.n||0))>1?'s':'')}); });
+    edges.push({from:'c-user',to:'c-interface',kind:'sync',label:'Uses the page'},{from:'c-retrieval',to:'c-model',kind:'async',label:'HTTP JSON · local only'},
+      {from:'c-interface',to:'c-pages',kind:'build',label:'Public build, on approval'});
+    return {key:'container',W:X(4)+w+20,H:664,k:1.2,nodes,edges,labels:true,
+      groups:[{id:'boundary',x:X(0)-18,y:y-48,w:4*246+w+36,h:h+66,title:'Flaregrain',sub:'Software system boundary'}],title:'Container view: the parts that run, and what they talk to'};
+  }
+  function sysdContextGraph() {
+    const nodes=[
+      {id:'x-user',x:40,y:60,w:250,h:136,label:'Researcher or judge',tech:'Person',type:'person',tier:'context',shape:'person',desc:'Asks which NASA investigations match a habitat, compares records and checks where each value comes from.'},
+      {id:'x-team',x:40,y:430,w:250,h:136,label:'Sparkline Foundry team',tech:'Person',type:'person',tier:'context',shape:'person',desc:'Builds the pipeline, checks records against NASA pages by hand and approves each publish.'},
+      {id:'x-flaregrain',x:430,y:220,w:340,h:206,label:'Flaregrain',tech:'Software system',type:'system',tier:'context',shape:'system',drill:'container',
+        desc:'NASA combustion evidence for fire safety: ranks investigations, shows NASA’s values with their provenance, and checks every model sentence.',
+        count:psiCatalog.studies.length+' investigations · '+psiCatalog.runs.length.toLocaleString('en')+' rows · '+Object.keys(runs).length+' checked records'},
+      {id:'x-psi',x:910,y:30,w:270,h:136,label:'NASA PSI repository',tech:'External system',type:'external',tier:'psi',shape:'external',desc:'Physical Sciences Informatics: investigation records and experimental tables. Public, CC0 on most records.'},
+      {id:'x-ntrs',x:910,y:256,w:270,h:136,label:'NASA technical reports',tech:'External system',type:'doc',tier:'checked',shape:'external',desc:'The reports the records cite, kept as hashed PDFs and read page by page.'},
+      {id:'x-model',x:910,y:482,w:270,h:136,label:'Local language model',tech:'External system · optional',type:'model',tier:'model',shape:'external',desc:'qwen3:4b served by Ollama. Reads questions and drafts comparison sentences; never sets a value.'},
+      {id:'x-pages',x:430,y:500,w:340,h:118,label:'GitHub Pages',tech:'External system',type:'deploy',tier:'context',shape:'external',desc:'Hosts the public build: no model calls, saved explanations only.'}];
+    nodes.forEach(node=>{ node.search=node.label+' '+node.desc; });
+    const edges=[{from:'x-user',to:'x-flaregrain',kind:'sync',label:'Asks, compares, traces [browser]'},
+      {from:'x-team',to:'x-flaregrain',kind:'build',label:'Builds, checks, hand-checks [Python · git]'},
+      {from:'x-flaregrain',to:'x-psi',kind:'build',label:'Fetches records and tables [JSON/HTTPS]'},
+      {from:'x-flaregrain',to:'x-ntrs',kind:'build',label:'Reads cited reports [PDF]'},
+      {from:'x-flaregrain',to:'x-model',kind:'async',label:'Question → criteria, facts → sentences'},
+      {from:'x-flaregrain',to:'x-pages',kind:'build',label:'Public build, on approval'}];
+    return {key:'context',W:1210,H:650,k:1.2,nodes,edges,groups:[],labels:true,title:'System context: who uses Flaregrain and what it depends on'};
+  }
+  function sysdDeployGraph() {
+    const A=(id,x,y,label,tech,type,tier,desc)=>({id,x,y,w:186,h:76,label,tech,type,tier,desc,search:label+' '+tech+' '+desc});
+    const nodes=[
+      {id:'d-nasa',x:30,y:56,w:212,h:118,label:'NASA PSI and reports',tech:'External · HTTPS',type:'external',tier:'psi',shape:'external',desc:'Fetched at build time; hashed offline copies are kept.',search:'nasa psi reports'},
+      A('d-build',322,90,'build_all.py','Python 3 · src/ and NASA files','script','context','One command: intake (offline) → observations → products → page → public build → checks.'),
+      A('d-checks',542,200,'Checks','Node · headless browser','test','context','22 regression checks, 2 journeys and the evaluation set, run against the built page.'),
+      A('d-local',322,310,'Local build','One HTML file','view','context','The full page with model calls, opened from disk during rehearsal.'),
+      A('d-ollama-l',542,310,'Local model','Ollama · qwen3:4b','model','model','The model on the laptop itself, used when the model host is not reachable.'),
+      A('d-corpus',42,286,'Report corpus build','build_corpus.py','script','checked','Splits hashed report PDFs into page chunks; results return through git.'),
+      A('d-ollama-m',42,396,'Model server','Ollama · qwen3:4b, same digest','model','model','Serves the model to the laptop over a private network during the event.'),
+      A('d-long',42,506,'Long runs','Model checks · retrieval tests','test','context','55-pair model checks and evaluation reruns that take too long for the laptop.'),
+      A('d-repo',842,90,'Public repository','git · reviewed publish','data','context','Holds the public build. Updated only when José Pablo approves.'),
+      A('d-pages',842,200,'GitHub Pages','Static hosting · HTTPS','deploy','context','Serves the page to judges. No server code.'),
+      A('d-public',842,420,'Public page','No model · saved explanations','view','context','The same page with data-build="public": no model requests, saved explanations only.')];
+    const edges=[{from:'d-nasa',to:'d-build',kind:'build',label:'HTTPS fetch, offline copy'},{from:'d-corpus',to:'d-build',kind:'build',label:'Page chunks via git'},
+      {from:'d-build',to:'d-local',kind:'build',label:'One HTML file'},{from:'d-checks',to:'d-local',kind:'build',label:'Tests'},
+      {from:'d-local',to:'d-ollama-l',kind:'async',label:'HTTP · same machine'},{from:'d-local',to:'d-ollama-m',kind:'async',label:'HTTP · private network'},
+      {from:'d-build',to:'d-repo',kind:'build',label:'git push, on approval'},{from:'d-repo',to:'d-pages',kind:'build',label:'Pages build'},{from:'d-pages',to:'d-public',kind:'sync',label:'HTTPS'}];
+    const groups=[{id:'laptop',x:302,y:40,w:452,h:372,title:'Team laptop',sub:'macOS · builds and rehearses',deploy:true,icon:'laptop'},
+      {id:'mini',x:22,y:236,w:226,h:372,title:'Model host',sub:'Mac Mini · private network',deploy:true,icon:'server'},
+      {id:'github',x:822,y:40,w:226,h:262,title:'GitHub',sub:'Public',deploy:true,icon:'deploy'},
+      {id:'visitor',x:822,y:370,w:226,h:142,title:'Visitor’s browser',sub:'Judges and the public',deploy:true,icon:'view'}];
+    nodes.forEach(node=>{ node.group=groups.find(g=>node.x>=g.x&&node.x<=g.x+g.w&&node.y>=g.y&&node.y<=g.y+g.h)?.id||''; });
+    return {key:'deployment',W:1066,H:620,k:1.1,nodes,edges,groups,labels:true,title:'Deployment: where each part runs'};
+  }
+  function sysdGraph() {
+    const s=sysdS();
+    return s.view==='deployment'?sysdDeployGraph():s.level==='context'?sysdContextGraph():s.level==='container'?sysdContainerGraph():sysdComponentGraph();
+  }
+
+  // ---- Drawing.
+  const sysdIcon=(type,x,y,size=16)=>'<path class="sysd-ico" d="'+(sysdIcons[type]||sysdIcons.data)+'" transform="translate('+x+' '+y+') scale('+(size/16)+')"/>';
+  function sysdRoute(a,b,g) {
+    const ax=a.x+a.w/2, ay=a.y+a.h/2, bx=b.x+b.w/2, by=b.y+b.h/2;
+    if (g.key==='component'&&a.col!=null&&a.col===b.col) {
+      const x=a.x+a.w, c=x+44, y1=ay+(by>ay?10:-10), y2=by+(by>ay?-10:10);
+      return {d:'M'+x+' '+y1+' C'+c+' '+y1+' '+c+' '+y2+' '+(x+3)+' '+y2,mx:x+33,my:(y1+y2)/2};
+    }
+    const dx=bx-ax, dy=by-ay;
+    let p;
+    if (Math.abs(dx)>=Math.abs(dy)*0.9) {
+      const x1=dx>0?a.x+a.w:a.x, x2=dx>0?b.x-3:b.x+b.w+3, c=(x2-x1)/2;
+      p=[x1,ay,x1+c,ay,x2-c,by,x2,by];
+    } else {
+      const y1=dy>0?a.y+a.h:a.y, y2=dy>0?b.y-3:b.y+b.h+3, c=(y2-y1)/2;
+      p=[ax,y1,ax,y1+c,bx,y2-c,bx,y2];
+    }
+    return {d:'M'+p[0].toFixed(1)+' '+p[1].toFixed(1)+' C'+p.slice(2).map(v=>v.toFixed(1)).join(' '),
+      mx:(p[0]+3*p[2]+3*p[4]+p[6])/8, my:(p[1]+3*p[3]+3*p[5]+p[7])/8};
+  }
+  function sysdNodeSvg(n,g) {
+    const shape=n.shape||'box', x=n.x, y=n.y, w=n.w, h=n.h, k=g.k||1, big=shape==='system';
+    const tip=n.label+(n.tech?', '+n.tech:'')+(n.count?'. '+n.count:'')+(n.drill?'. Press Enter twice to open.':'');
+    let body='<rect class="sysd-n-box" x="'+x+'" y="'+y+'" width="'+w+'" height="'+h+'" rx="'+(shape==='person'?20:big?12:8)+'"/>';
+    if (shape==='person') body+='<circle class="sysd-n-head" cx="'+(x+w/2)+'" cy="'+(y-14*k)+'" r="'+(17*k)+'"/>';
+    body+='<rect class="sysd-n-stripe" x="'+(x+1)+'" y="'+(y+10)+'" width="3" height="'+(h-20)+'" rx="1.5"/>';
+    body+=sysdIcon(n.type,x+14,y+13*k,16*k);
+    const tx=x+18+20*k, line=y+66*k;
+    body+='<text class="sysd-n-label'+(big?' is-big':'')+'" x="'+tx+'" y="'+(y+(big?29:26)*k)+'">'+sysdEsc(sysdClip(n.label,Math.floor((w-tx+x-10)/((big?10:7.4)*k))))+'</text>';
+    body+='<text class="sysd-n-tech" x="'+tx+'" y="'+(y+(big?48:43)*k)+'">['+sysdEsc(sysdClip(n.tech,Math.floor((w-tx+x-14)/(6.1*k))))+']</text>';
+    const room=Math.floor((h-(n.count?24*k:8*k)-line+y+12*k)/(15*k));
+    if (n.desc&&room>0) sysdWrap(n.desc,Math.floor((w-28)/(6.3*k)),room).forEach((text,i)=>{ body+='<text class="sysd-n-desc" x="'+(x+14)+'" y="'+(line+i*15*k)+'">'+sysdEsc(text)+'</text>'; });
+    if (n.count) body+='<text class="sysd-n-count" x="'+(x+14)+'" y="'+(y+h-11*k)+'">'+sysdEsc(sysdClip(n.count,Math.floor((w-(n.drill?44:24))/(6.2*k))))+'</text>';
+    if (n.drill) body+='<path class="sysd-n-drill" d="M'+(x+w-22)+' '+(y+h-20)+'h10v10M'+(x+w-12)+' '+(y+h-20)+'l-7 7"/>';
+    return '<g class="sysd-n" data-sysd-node="'+n.id+'" data-tier="'+n.tier+'" data-type="'+n.type+'"'+(n.planned?' data-planned="true"':'')+
+      ' role="button" tabindex="-1" aria-pressed="false" aria-label="'+sysdEsc(tip)+'">'+body+'</g>';
+  }
+  function sysdCanvasSvg(g) {
+    const byId=new Map(g.nodes.map(n=>[n.id,n]));
+    const marker=(id,cls)=>'<marker id="'+id+'" viewBox="0 0 10 10" refX="8.5" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0 0 L10 5 L0 10 z" class="'+cls+'"/></marker>';
+    const groups=g.groups.map(gr=>{
+      const bevel=gr.deploy?'<path class="sysd-grp-bevel" d="M'+gr.x+' '+gr.y+' l10 -10 h'+gr.w+' v'+gr.h+' l-10 10 M'+(gr.x+gr.w)+' '+gr.y+' l10 -10"/>':'';
+      return '<g class="sysd-grp'+(gr.planned?' is-planned':'')+(gr.deploy?' is-deploy':'')+'" data-sysd-group="'+gr.id+'">'+bevel+
+        '<rect x="'+gr.x+'" y="'+gr.y+'" width="'+gr.w+'" height="'+gr.h+'" rx="'+(gr.deploy?2:12)+'"/>'+(gr.icon?sysdIcon(gr.icon,gr.x+12,gr.y+10,14):'')+
+        '<text class="sysd-grp-title" x="'+(gr.x+(gr.icon?32:14))+'" y="'+(gr.y+21)+'">'+sysdEsc(gr.title)+'</text>'+
+        '<text class="sysd-grp-sub" x="'+(gr.x+(gr.icon?32:14))+'" y="'+(gr.y+35)+'">['+sysdEsc(sysdClip(gr.sub,Math.floor((gr.w-(gr.icon?44:26))/6.3)))+']</text></g>';
+    }).join('');
+    const routes=g.edges.map(e=>{ const a=byId.get(e.from), b=byId.get(e.to); return a&&b?{e,r:sysdRoute(a,b,g)}:null; }).filter(Boolean);
+    const edges=routes.map(({e,r},i)=>'<g class="sysd-e" data-sysd-edge="'+i+'" data-from="'+e.from+'" data-to="'+e.to+'" data-kind="'+e.kind+'">'+
+      '<title>'+sysdEsc((byId.get(e.from).label)+' → '+(byId.get(e.to).label)+': '+e.label+' ('+sysdKinds[e.kind]+')')+'</title>'+
+      '<path class="sysd-e-hit" d="'+r.d+'"/><path class="sysd-e-line" d="'+r.d+'"'+(e.both?' marker-start="url(#sysd-arr)"':'')+' marker-end="url(#sysd-arr)"/></g>').join('');
+    const labels=routes.map(({e,r},i)=>'<text class="sysd-e-label'+(g.labels?' is-shown':'')+'" data-sysd-edge-label="'+i+'" x="'+r.mx.toFixed(1)+'" y="'+(r.my-5).toFixed(1)+'" text-anchor="middle">'+sysdEsc(e.label)+'</text>').join('');
+    return '<svg class="sysd-canvas" id="sysd-canvas" data-graph="'+g.key+'" style="--k:'+(g.k||1)+'" viewBox="0 0 '+g.W+' '+g.H+'" preserveAspectRatio="xMidYMid meet" role="group" aria-label="'+sysdEsc(g.title)+'" aria-describedby="sysd-canvas-help">'+
+      '<defs>'+marker('sysd-arr','sysd-arrowhead')+marker('sysd-arr-hi','sysd-arrowhead is-hi')+'</defs>'+
+      '<g class="sysd-world">'+groups+'<g class="sysd-edges">'+edges+'</g>'+g.nodes.map(n=>sysdNodeSvg(n,g)).join('')+'<g class="sysd-labels">'+labels+'</g>'+
+      '<circle class="sysd-pulse" r="6" cx="-99" cy="-99"/></g></svg>';
+  }
+  function sysdMinimapSvg(g) {
+    return '<svg class="sysd-minimap-svg" viewBox="-20 -20 '+(g.W+40)+' '+(g.H+40)+'" preserveAspectRatio="xMidYMid meet" aria-hidden="true">'+
+      g.groups.map(gr=>'<rect class="sysd-mm-grp" x="'+gr.x+'" y="'+gr.y+'" width="'+gr.w+'" height="'+gr.h+'" rx="8"/>').join('')+
+      g.nodes.map(n=>'<rect class="sysd-mm-node" data-tier="'+n.tier+'" data-mm-node="'+n.id+'" x="'+n.x+'" y="'+n.y+'" width="'+n.w+'" height="'+n.h+'" rx="6"/>').join('')+
+      '<rect class="sysd-mm-view" x="0" y="0" width="'+g.W+'" height="'+g.H+'"/></svg>';
+  }
+
+  // ---- Detail panel.
+  function sysdLayerGap(layerId) { return sysdLayerMeta[layerId]?'<div class="sysd-gap">'+provenanceBadge('reading')+' <strong>Known limit.</strong> '+sysdEsc(sysdLayerMeta[layerId].gap)+'</div>':''; }
+  function sysdDetail(g,id) {
+    const s=sysdS();
+    const node=g.nodes.find(n=>n.id===id);
+    if (!node) return '<h3 id="sysd-detail-title">'+sysdEsc(g.title)+'</h3><p class="small muted">'+({
+      context:'Level 1 of 3 (C4 system context). Select a box for detail; open Flaregrain to see its containers.',
+      container:'Level 2 of 3 (C4 containers). Select a container for detail; open it to see its components.',
+      component:'Level 3 of 3 (C4 components). Select a part to light its full upstream and downstream path. Use Replay to watch a question or a build move through it.',
+      deployment:'Where each part runs. No addresses or machine names are shown; the model host is reached over a private network.'})[g.key]+'</p>'+
+      '<dl class="sysd-facts">'+g.nodes.filter(n=>n.count).slice(0,6).map(n=>'<dt>'+sysdEsc(n.label)+'</dt><dd>'+sysdEsc(n.count)+'</dd>').join('')+'</dl>';
+    const ins=g.edges.filter(e=>e.to===id), outs=g.edges.filter(e=>e.from===id);
+    const name=nid=>g.nodes.find(n=>n.id===nid)?.label||nid;
+    const flowList=list=>list.map(e=>'<li><button type="button" class="text-action" data-sysd-goto="'+(e.from===id?e.to:e.from)+'">'+sysdEsc(name(e.from===id?e.to:e.from))+'</button> <span class="small muted">'+sysdEsc(e.label)+' · '+sysdEsc(sysdKinds[e.kind])+'</span></li>').join('');
     const row=(label,value)=>value?'<dt>'+label+'</dt><dd>'+value+'</dd>':'';
-    return '<h3 id="sysd-detail-title">'+escapeText(node.label)+'</h3><p class="small muted">'+escapeText(node.layer.title)+(node.layer.planned?' · not built':' · built and running')+'</p>'+
-      '<p>'+escapeText(node.what)+'</p><dl class="sysd-facts">'+
-      row('Live count','<strong>'+escapeText(String(node.count()))+'</strong>')+
-      row('Files',node.files.map(file=>'<code>'+escapeText(file)+'</code>').join('<br>'))+
-      row('Comes from',escapeText(ins.join(', ')||node.in||''))+
-      row('Feeds',escapeText(outs.join(', ')||node.out||''))+
-      row('Checked by',escapeText(node.checks.join('; ')))+'</dl>';
+    const head='<p class="sysd-detail-kicker"><svg viewBox="0 0 16 16" aria-hidden="true">'+sysdIcon(node.type,0,0)+'</svg> '+sysdEsc(node.tech)+'</p><h3 id="sysd-detail-title">'+sysdEsc(node.label)+'</h3>';
+    const tier='<p class="small"><span class="sysd-tier-dot" data-tier="'+node.tier+'"></span>'+sysdEsc(sysdTierNames[node.tier])+'</p>';
+    if (g.key==='component') {
+      const arch=archNode(id);
+      return head+tier+'<p>'+sysdEsc(arch.what)+'</p><dl class="sysd-facts">'+row('Live count','<strong>'+sysdEsc(node.count)+'</strong>')+
+        row('Files',(arch.files||[]).map(file=>'<code>'+sysdEsc(file)+'</code>').join('<br>'))+
+        row('Comes from',ins.length?'<ul>'+flowList(ins)+'</ul>':sysdEsc(arch.in||''))+row('Feeds',outs.length?'<ul>'+flowList(outs)+'</ul>':sysdEsc(arch.out||''))+
+        row('Checked by',sysdEsc((arch.checks||[]).join('; ')))+'</dl>'+sysdLayerGap(arch.layer.id);
+    }
+    if (g.key==='container'&&node.drill) {
+      const layer=archLayers.find(item=>item.id===node.drill);
+      return head+tier+'<p>'+sysdEsc(node.desc)+'</p><dl class="sysd-facts">'+row('Live count','<strong>'+sysdEsc(node.count)+'</strong>')+
+        row('Components','<ul>'+layer.nodes.map(item=>'<li><button type="button" class="text-action" data-sysd-open="'+item.id+'">'+sysdEsc(item.label)+'</button></li>').join('')+'</ul>')+
+        row('Talks to',outs.concat(ins).length?'<ul>'+flowList(outs.concat(ins))+'</ul>':'')+'</dl>'+
+        '<button type="button" class="outline sysd-drill" data-sysd-drill="'+node.drill+'">Open components</button>'+sysdLayerGap(node.drill);
+    }
+    return head+tier+'<p>'+sysdEsc(node.desc||'')+'</p><dl class="sysd-facts">'+row('Live count',node.count?'<strong>'+sysdEsc(node.count)+'</strong>':'')+
+      row('Flows',outs.concat(ins).length?'<ul>'+flowList(outs.concat(ins))+'</ul>':'')+'</dl>'+
+      (node.drill==='container'?'<button type="button" class="outline sysd-drill" data-sysd-drill="container">Open containers</button>':'');
   }
 
-  // Request flow as a sequence diagram, for the public build (no model) and the local build (model and checker).
-  const sysdActors=['Person','Page (rules)','Report search','Local model','Checker'];
+  // ---- Replays (component level): a question or a build moving through the parts, step by step.
+  const sysdReplays={
+    local:{label:'Ask a question, local build',steps:[['views','criteria','The question goes to the local model over HTTP.'],['criteria','rank','The model returns criteria under a JSON schema; they are shown, checked and removable.'],
+      ['catalog','rank','Rules rank the 24 investigations by the criteria they meet, each with a reason.'],['passages','bm25','BM25 searches report passages, at most two per report.'],
+      ['checked','explain','For a comparison, the checked facts are numbered; disputed values are withheld.'],['catalog','explain','PSI row facts join them, each with its CSV line.'],
+      ['explain','checker','The model writes sentences that cite fact IDs.'],['checker','tiers','The checker removes any sentence it cannot trace; the rest get badges.'],
+      ['rank','views','Ranked investigations with reasons reach the page.'],['bm25','views','Passages with their PDF pages.'],['tiers','views','Checked sentences, each with its provenance badge.']]},
+    public:{label:'Ask a question, public build',steps:[['catalog','rank','Rules read the question and rank investigations; no model call is made.'],['passages','bm25','BM25 searches report passages.'],
+      ['saved','checker','A saved explanation is looked up by a fingerprint of the facts; it already passed the checker.'],['checker','tiers','Each sentence keeps its badge.'],
+      ['rank','views','Ranked investigations with reasons.'],['bm25','views','Passages with PDF pages.'],['tiers','views','Saved sentences with badges.']]},
+    build:{label:'Build the page',steps:[['psi-api','intake','psi_intake.py fetches 24 investigations, or reads the saved copies offline.'],['psi-csv','intake','Every table file is hashed into the manifest.'],
+      ['intake','observe','Each table cell becomes an observation with its locator.'],['second','observe','Second readings sit beside NASA’s value, never replacing it.'],
+      ['observe','catalog','Rows and profiles become the catalog block.'],['observe','issues','Printing issues become flags, not silent fixes.'],['observe','trends','Two small models are fitted.'],
+      ['reports','corpus','Report PDFs are hashed and split by page.'],['corpus','passages','Pages are cut into ~600-character passages.'],
+      ['page','views','build_page.py writes one HTML file.'],['checks','page','22 regression checks and 2 journeys run against it.'],['page','public','The public build drops model calls.']]}};
+  let sysdTimer=0, sysdPulseTween=null;
+  function sysdStopReplay() { clearTimeout(sysdTimer); sysdS().playing=false; }
+
+  // ---- Request flow (UML sequence diagram).
+  const sysdActors=[['Person','person'],['Page (rules)','view'],['Report search','search'],['Local model','model'],['Checker','checker']];
   const sysdFlows={
-    public:[[0,1,'Asks a question'],[1,1,'Rules read the question: named investigations, synonyms, conditions'],[1,2,'BM25 over report passages'],[2,1,'Up to 5 passages with PDF pages'],
-      [1,4,'Looks up a saved explanation by facts fingerprint'],[4,1,'Sentences that already passed the checker'],[1,0,'Ranked investigations, reasons, passages, badges']],
-    local:[[0,1,'Asks a question'],[1,3,'Question → criteria (JSON schema)'],[3,1,'Criteria, shown and removable'],[1,1,'Rank by criteria met; rules keep order if the model is silent'],
-      [1,2,'BM25 over report passages'],[2,1,'Passages with PDF pages'],[0,1,'Compares two records'],[1,3,'Numbered facts, disputed values withheld'],
-      [3,4,'Sentences citing fact IDs'],[4,1,'Passed sentences; removed ones with reasons'],[1,0,'Answer with badges and sources']]};
-  function sysdSequence(mode) {
-    const steps=sysdFlows[mode], W=1120, colW=W/sysdActors.length, X=i=>colW*i+colW/2, rowH=40, H=70+steps.length*rowH+20;
-    const heads=sysdActors.map((actor,i)=>'<g class="sysd-actor'+((mode==='public'&&i===3)?' is-off':'')+'"><rect x="'+(X(i)-80)+'" y="8" width="160" height="34" rx="8"/><text x="'+X(i)+'" y="30" text-anchor="middle">'+escapeText(actor)+'</text>'+
-      '<line x1="'+X(i)+'" x2="'+X(i)+'" y1="42" y2="'+(H-10)+'"/></g>').join('');
-    const arrows=steps.map(([from,to,label],k)=>{
-      const y=70+k*rowH;
-      if (from===to) return '<path class="sysd-msg" d="M'+X(from)+' '+(y-8)+' h40 v16 h-36" marker-end="url(#sysd-seq-arrow)"/><text class="sysd-msg-label" x="'+(X(from)+48)+'" y="'+(y+4)+'">'+(k+1)+'. '+escapeText(label)+'</text>';
-      const left=Math.min(X(from),X(to)), right=Math.max(X(from),X(to));
-      return '<line class="sysd-msg" x1="'+X(from)+'" x2="'+(X(to)+(to>from?-4:4))+'" y1="'+y+'" y2="'+y+'" marker-end="url(#sysd-seq-arrow)"/>'+
-        '<text class="sysd-msg-label" x="'+((left+right)/2)+'" y="'+(y-6)+'" text-anchor="middle">'+(k+1)+'. '+escapeText(label)+'</text>';
+    public:{steps:[[0,1,'Asks a question','views'],[1,1,'Rules read the question: named investigations, synonyms, conditions','rank'],[1,2,'BM25 over report passages','bm25'],[2,1,'Up to 5 passages with PDF pages','bm25'],
+      [1,4,'Saved explanation, looked up by facts fingerprint','saved'],[4,1,'Sentences that already passed the checker','checker'],[1,0,'Ranked investigations, reasons, passages, badges','tiers']],frames:[]},
+    local:{steps:[[0,1,'Asks a question','views'],[1,3,'Question → criteria (JSON schema)','criteria'],[3,1,'Criteria, shown and removable','criteria'],[1,1,'Rank by criteria met','rank'],
+      [1,2,'BM25 over report passages','bm25'],[2,1,'Passages with PDF pages','bm25'],[0,1,'Compares two records','views'],[1,3,'Numbered facts, disputed values withheld','explain'],
+      [3,4,'Sentences citing fact IDs','explain'],[4,1,'Passed sentences; removed ones with reasons','checker'],[1,0,'Answer with badges and sources','tiers']],
+      frames:[[1,2,'opt','model reachable','else rules keep their order'],[7,9,'alt','model reachable','else a saved explanation']]}};
+  function sysdSequenceSvg(mode,active) {
+    const flow=sysdFlows[mode], steps=flow.steps, W=1180, colW=W/sysdActors.length, X=i=>colW*i+colW/2, rowH=46, top=96, H=top+steps.length*rowH+24;
+    const heads=sysdActors.map(([actor,type],i)=>'<g class="sysd-actor'+((mode==='public'&&i===3)?' is-off':'')+'"><rect x="'+(X(i)-88)+'" y="10" width="176" height="44" rx="8"/>'+
+      sysdIcon(type,X(i)-76,24)+'<text x="'+(X(i)+8)+'" y="37" text-anchor="middle">'+sysdEsc(actor)+'</text>'+
+      (mode==='public'&&i===3?'<text class="sysd-actor-off" x="'+X(i)+'" y="72" text-anchor="middle">not called in the public build</text>':'')+
+      '<line x1="'+X(i)+'" x2="'+X(i)+'" y1="54" y2="'+(H-8)+'"/></g>').join('');
+    // Activation bars: an actor is active from a message it receives until the next message it sends ends.
+    const bars=[];
+    steps.forEach(([from,to],k)=>{ if (to!==0&&from!==to) { const end=steps.findIndex(([f],j)=>j>k&&f===to&&steps[j][1]!==to); bars.push([to,top+k*rowH,top+(end<0?k+1:end)*rowH+6]); } });
+    const barSvg=bars.map(([i,y1,y2])=>'<rect class="sysd-activation" x="'+(X(i)-5)+'" y="'+y1+'" width="10" height="'+Math.max(14,y2-y1)+'"/>').join('');
+    const frames=flow.frames.map(([a,b,op,guard,other])=>{ const y1=top+a*rowH-30, y2=top+b*rowH+18, x1=X(0)+20, x2=X(4)+110;
+      return '<g class="sysd-frame"><rect x="'+x1+'" y="'+y1+'" width="'+(x2-x1)+'" height="'+(y2-y1)+'"/><path d="M'+x1+' '+(y1+18)+'h40l8 -8v-10"/>'+
+        '<text class="sysd-frame-op" x="'+(x1+6)+'" y="'+(y1+13)+'">'+op+'</text><text class="sysd-frame-guard" x="'+(x1+54)+'" y="'+(y1+13)+'">['+sysdEsc(guard)+']</text><text class="sysd-frame-guard" x="'+(x2-8)+'" y="'+(y2-6)+'" text-anchor="end">'+sysdEsc(other)+'</text></g>'; }).join('');
+    const msgs=steps.map(([from,to,label],k)=>{
+      const y=top+k*rowH, cls='sysd-msg-g'+(k===active?' is-active':'')+(active>=0&&k<active?' is-done':''), ret=to<from&&to!==from;
+      let body;
+      if (from===to) body='<path class="sysd-msg" d="M'+(X(from)+5)+' '+(y-10)+' h44 v18 h-40" marker-end="url(#sysd-seq-arrow)"/><text class="sysd-msg-label" x="'+(X(from)+56)+'" y="'+(y+3)+'">'+sysdEsc(label)+'</text>';
+      else { const l=Math.min(X(from),X(to)), r=Math.max(X(from),X(to));
+        body='<line class="sysd-msg'+(ret?' is-return':'')+'" x1="'+(X(from)+(to>from?5:-5))+'" x2="'+(X(to)+(to>from?-7:7))+'" y1="'+y+'" y2="'+y+'" marker-end="url(#sysd-seq-arrow)"/>'+
+          '<text class="sysd-msg-label" x="'+((l+r)/2)+'" y="'+(y-7)+'" text-anchor="middle">'+sysdEsc(label)+'</text>'; }
+      const nx=(from===to?X(from):Math.min(X(from),X(to)))-18;
+      return '<g class="'+cls+'" data-sysd-msg="'+k+'" role="button" tabindex="0" aria-pressed="'+(k===active)+'" aria-label="'+sysdEsc('Step '+(k+1)+': '+sysdActors[from][0]+' to '+sysdActors[to][0]+', '+label)+'">'+
+        '<rect class="sysd-msg-hit" x="0" y="'+(y-24)+'" width="'+W+'" height="'+(rowH-6)+'"/>'+body+
+        '<circle class="sysd-msg-num" cx="'+nx+'" cy="'+(y-7)+'" r="9"/><text class="sysd-msg-numtext" x="'+nx+'" y="'+(y-3.5)+'" text-anchor="middle">'+(k+1)+'</text></g>';
     }).join('');
-    return '<svg class="sysd-sequence" viewBox="0 0 '+W+' '+H+'" role="img" aria-label="'+escapeText((mode==='public'?'Public build':'Local build')+' request flow: '+steps.map(([,,label])=>label).join('; '))+'">'+
-      '<defs><marker id="sysd-seq-arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M0 0 L10 5 L0 10 z" class="sysd-arrowhead"/></marker></defs>'+heads+arrows+'</svg>';
+    return '<svg class="sysd-sequence" id="sysd-canvas" data-graph="sequence-'+mode+'" viewBox="0 0 '+W+' '+H+'" role="group" aria-label="'+sysdEsc((mode==='public'?'Public build':'Local build')+' request flow, '+steps.length+' steps')+'">'+
+      '<defs><marker id="sysd-seq-arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M0 0 L10 5 L0 10 z" class="sysd-arrowhead"/></marker></defs>'+
+      frames+heads+barSvg+msgs+'</svg>';
+  }
+  function sysdFlowDetail(mode,k) {
+    const steps=sysdFlows[mode].steps;
+    if (k<0||!steps[k]) return '<h3 id="sysd-detail-title">'+(mode==='public'?'Public build':'Local build')+'</h3><p class="small muted">A UML sequence diagram: actors across the top, time running down. Bars show when an actor is busy; the boxed frames are optional or alternative paths. Select a step, or press Play.</p>'+
+      '<p>'+(mode==='public'?'No model is called. Explanations come from a saved set that already passed the same checker.':'The local model reads the question and drafts sentences; rules still decide the ranking and the checker decides what is shown.')+'</p>';
+    const [from,to,label,comp]=steps[k], arch=archNode(comp);
+    return '<p class="sysd-detail-kicker">Step '+(k+1)+' of '+steps.length+' · '+sysdEsc(sysdActors[from][0])+' → '+sysdEsc(sysdActors[to][0])+'</p><h3 id="sysd-detail-title">'+sysdEsc(label)+'</h3>'+
+      (arch?'<p>Handled by <strong>'+sysdEsc(arch.label)+'</strong>: '+sysdEsc(arch.what)+'</p><dl class="sysd-facts"><dt>Live count</dt><dd>'+sysdEsc(sysdCount(arch.count))+'</dd><dt>Files</dt><dd>'+arch.files.map(f=>'<code>'+sysdEsc(f)+'</code>').join('<br>')+'</dd></dl>'+
+        '<button type="button" class="outline" data-sysd-open="'+comp+'">Show in architecture</button>':'');
   }
 
-  // Trace one value end to end: BASS-II B1's oxygen, from the NASA report to a sentence the checker allows.
-  function sysdTrace() {
+  // ---- Data lineage: one value, hop by hop, with the locator at each hop.
+  function sysdLineages() {
     const b1=runs.B1, field=b1?.fields?.find(item=>/^Oxygen/.test(item[0]));
     const psiRow=psiCatalog.runs.find(run=>run[1]==='psi-25'&&run[10]==='B1');
-    const facts=[{id:'F1',record:'BASS-II B1',field:field?.[0]||'Oxygen',value:field?.[1]||'',kind:''}];
-    const test=text=>{ try { return checkSentence({text,cites:['F1']},facts,['BASS-II B1']); } catch { return null; } };
-    const verdict=result=>{
-      const problems=Array.isArray(result)?result:result?.problems;
-      return !problems?'<span class="muted">checker unavailable</span>':problems.length?'<strong class="sysd-removed">Removed</strong>: '+escapeText(problems.join('; ')):'<strong class="sysd-passed">Passes</strong>';
-    };
-    const good='BASS-II B1 burned in 22.2% oxygen.', bad='BASS-II B1 burned in 21% oxygen.';
-    const steps=[
-      ['NASA report','NASA Table A.1, sample 147: the calibrated oxygen for run B1.',b1?.source?link(b1.source):''],
-      ['Checked NASA record',provenanceBadge('checked')+' '+escapeText((field?.[0]||'Oxygen')+': '+(field?.[1]||'not found')),'<code>src/data/rehearsal-data.json</code>'],
-      ['PSI table row',provenanceBadge('psi')+' '+(psiRow?escapeText('Oxygen in the surrounding gas: '+((psiRow[11]||[]).find(f=>/^Oxygen in/.test(f[0]))?.[1]||psiRow[6][0]+'%')):'not found'),psiRow?link(psiRow[9]):''],
-      ['Fact given to the model','<code>F1 [BASS-II B1] '+escapeText(facts[0].field+': '+facts[0].value)+'</code>','Disputed values would be withheld here'],
-      ['Checker, run live on this page','“'+escapeText(good)+'” → '+verdict(test(good))+'<br>“'+escapeText(bad)+'” → '+verdict(test(bad)),'<code>checkSentence()</code>'],
-      ['On screen','Compare and Evidence show the value with its badge and both locators.','<button type="button" class="text-action" data-record-evidence="B1">Open B1 evidence</button>']];
-    return '<ol class="sysd-trace">'+steps.map(([title,body,where],i)=>'<li data-sysd-trace-step="'+(i+1)+'"><h4>'+escapeText(title)+'</h4><p>'+body+'</p>'+(where?'<p class="small muted">'+where+'</p>':'')+'</li>').join('')+'</ol>';
+    const psiOxygen=(psiRow?.[11]||[]).find(f=>/^Oxygen in/.test(f[0]))?.[1]||'';
+    const flagInv=psiIssues.investigations.find(inv=>inv.groups.some(gr=>gr.code==='percent_scale'));
+    const flag=flagInv?.groups.find(gr=>gr.code==='percent_scale'), ex=flag?.examples?.[0];
+    const passage=reportData.passages.find(p=>p[0]==='20210011385'&&/oxygen/i.test(p[2])&&+p[1]>5)||reportData.passages[0];
+    const doc=reportData.docs[passage?.[0]]||{};
+    const model=psiModels[0], fit=model?.fits?.[0], point=fit?.curve?.reduce((best,c)=>Math.abs(c.o2-0.21)<Math.abs(best.o2-0.21)?c:best,fit.curve[0]);
+    const H=(id,col,row,tier,title,body,where,from,comp)=>({id,col,row,tier,title,body,where,from:from||[],comp});
+    return {
+      b1:{label:'BASS-II B1 oxygen',kind:'checked',sub:'A hand-checked value meets the PSI table',hops:[
+        H('report',1,1,'checked','NASA report page','NASA Table A.1, sample 147: the calibrated oxygen for run B1.',b1?.source?link(b1.source):'','', 'reports'),
+        H('csv',1,2,'psi','PSI CSV line','PSI-25 experimental table, row B1.',psiRow?sysdEsc(psiRow[9][0]):'',null,'psi-csv'),
+        H('record',2,1,'checked','Checked NASA record',provenanceBadge('checked')+' '+sysdEsc((field?.[0]||'Oxygen')+': '+(field?.[1]||'not found')),'<code>src/data/rehearsal-data.json</code>',['report'],'checked'),
+        H('row',2,2,'psi','PSI table row',provenanceBadge('psi')+' Oxygen in the surrounding gas: '+sysdEsc(psiOxygen||'not found'),psiRow?link(psiRow[9]):'',['csv'],'catalog'),
+        H('fact',3,1,'model','Fact given to the model','<code>F1 [BASS-II B1] '+sysdEsc((field?.[0]||'Oxygen')+': '+(field?.[1]||''))+'</code>','The PSI row agrees; disputed values would be withheld here',['record','row'],'explain'),
+        H('check',4,1,'context','Checker, run live','“BASS-II B1 burned in 22.2% oxygen.” → '+sysdVerdictHtml(sysdRunCheck('BASS-II B1 burned in 22.2% oxygen. [F1]'))+'<br>“… 21% oxygen.” → '+sysdVerdictHtml(sysdRunCheck('BASS-II B1 burned in 21% oxygen. [F1]')),'<code>checkSentence()</code>',['fact'],'checker'),
+        H('screen',5,1,'context','On screen','Compare and Evidence show the value with its badge and both locators.','<button type="button" class="text-action" data-record-evidence="B1">Open B1 evidence</button>',['check'],'views')]},
+      flag:{label:(flagInv?.name||'PSI')+' oxygen, flagged',kind:'psi',sub:'A NASA printing issue is flagged, not fixed',hops:flag?[
+        H('cell',1,1,'psi','PSI table cell','NASA printed <strong>'+sysdEsc(ex.printed)+'</strong> in column “'+sysdEsc(flag.column)+'”.',sysdEsc(ex.observation.split(':').slice(1,3).join(' · line ')),null,'psi-csv'),
+        H('obs',2,1,'psi','Observation','Printed value kept as printed; normalized value, unit, locator and hash stored beside it.','<code>psi_observations.py</code>',['cell'],'observe'),
+        H('flagged',3,1,'model','Flag: '+sysdEsc(flag.kind),provenanceBadge('reading')+' '+sysdEsc(ex.detail),flag.count+' cell'+(flag.count>1?'s':'')+' with this flag in '+sysdEsc(flagInv.psi)+' · '+psiIssues.flagged_values+' flagged in all',['obs'],'issues'),
+        H('issues',4,1,'context','Data issues view','Both readings shown side by side. NASA’s printed value is never overwritten.','Explore → Data issues',['flagged'],'views')]:[]},
+      passage:{label:'A report passage',kind:'checked',sub:'NASA’s words, found by search, never used to set a value',hops:passage?[
+        H('pdf',1,1,'checked','Report PDF',sysdEsc(doc.name||passage[0]),doc.url?'<a href="'+sysdEsc(doc.url)+'#page='+passage[1]+'" target="_blank" rel="noopener">PDF page '+sysdEsc(passage[1])+'</a>':'',null,'reports'),
+        H('chunk',2,1,'checked','Page chunk','The PDF is hashed, then split into one text chunk per page.','<code>build_corpus.py</code>',['pdf'],'corpus'),
+        H('psg',3,1,'checked','Passage','“'+sysdEsc(sysdClip(passage[2],150))+'”','About 600 characters, cut at sentence ends · '+reportData.passages.length.toLocaleString('en')+' in all',['chunk'],'passages'),
+        H('bm25',4,1,'checked','BM25 index','Ranked by keyword match, at most two passages per report.','<code>07a-report-search.js</code>',['psg'],'bm25'),
+        H('from',5,1,'context','From NASA reports','Shown under the answer with a link to the exact PDF page.','',['bm25'],'views')]:[]},
+      model:{label:'A FLEX trend point',kind:'model',sub:'A Flaregrain model, labelled as one',hops:fit?[
+        H('rows',1,1,'psi','PSI-69 table rows',fit.n+' '+sysdEsc(fit.fuel.toLowerCase())+' rows from the FLEX tables.','PSI table rows',null,'psi-csv'),
+        H('obs2',2,1,'psi','Observations','Normalized oxygen, diameter, pressure and diluents with their locators.','<code>psi_observations.py</code>',['rows'],'observe'),
+        H('fit',3,1,'model','Fit',sysdEsc(sysdClip(model.method,140)),'R² '+fit.r2+' · '+sysdEsc(model.label.split('.')[0]),['obs2'],'trends'),
+        H('pt',4,1,'model','Curve point',provenanceBadge('model')+' At '+Math.round(point.o2*100)+'% oxygen: '+point.fit.toFixed(2)+' mm (90% band '+point.lo.toFixed(2)+'–'+point.hi.toFixed(2)+')',sysdEsc(model.curve_note.split(';')[0]),['fit'],'trends'),
+        H('trend',5,1,'context','Trends view','Drawn only across the measured range, badged as a Flaregrain model.','Explore → Trends',['pt'],'views')]:[]}};
+  }
+  function sysdLineageHtml(key,hop) {
+    const all=sysdLineages(), lin=all[key]||all.b1;
+    const picker='<div class="sysd-chips" role="group" aria-label="Value to trace">'+Object.entries(all).filter(([,l])=>l.hops.length).map(([k,l])=>
+      '<button type="button" class="sysd-chip" data-sysd-lineage="'+k+'" aria-pressed="'+(k===key)+'"><span class="sysd-tier-dot" data-tier="'+l.kind+'"></span>'+sysdEsc(l.label)+'</button>').join('')+'</div>';
+    const rows=Math.max(...lin.hops.map(h=>h.row));
+    const near=new Set(hop?[hop]:[]);
+    if (hop) { const up=id=>lin.hops.find(h=>h.id===id)?.from.forEach(f=>{ near.add(f); up(f); }); up(hop);
+      const down=id=>lin.hops.filter(h=>h.from.includes(id)).forEach(h=>{ near.add(h.id); down(h.id); }); down(hop); }
+    return picker+'<p class="small muted">'+sysdEsc(lin.sub)+'. Select a hop to light its path; each hop names the component that handles it.</p>'+
+      '<div class="sysd-lineage'+(hop?' has-focus':'')+'" style="--rows:'+rows+'"><svg class="sysd-lineage-links" aria-hidden="true"></svg><ol>'+lin.hops.map(h=>
+        '<li class="sysd-hop'+(near.has(h.id)?' is-path':'')+(h.id===hop?' is-sel':'')+'" data-sysd-hop="'+h.id+'" data-from="'+h.from.join(' ')+'" data-tier="'+h.tier+'" style="grid-column:'+h.col+';grid-row:'+h.row+'">'+
+        '<button type="button" class="sysd-hop-head" aria-pressed="'+(h.id===hop)+'"><span class="sysd-tier-dot" data-tier="'+h.tier+'"></span>'+h.title+'</button>'+
+        '<p>'+h.body+'</p>'+(h.where?'<p class="small muted">'+h.where+'</p>':'')+
+        '<button type="button" class="text-action sysd-hop-comp" data-sysd-open="'+h.comp+'">'+sysdEsc(archNode(h.comp)?.label||'')+' ↗</button></li>').join('')+'</ol></div>';
+  }
+  function sysdDrawLineage() {
+    const box=main.querySelector('.sysd-lineage'), svg=box?.querySelector('.sysd-lineage-links'); if (!svg) return;
+    const base=box.getBoundingClientRect();
+    svg.setAttribute('viewBox','0 0 '+base.width+' '+base.height);
+    svg.innerHTML='<defs><marker id="sysd-lin-arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M0 0 L10 5 L0 10 z" class="sysd-arrowhead"/></marker></defs>'+
+      [...box.querySelectorAll('[data-sysd-hop]')].flatMap(li=>li.dataset.from.split(' ').filter(Boolean).map(from=>{
+        const a=box.querySelector('[data-sysd-hop="'+from+'"]').getBoundingClientRect(), b=li.getBoundingClientRect();
+        const x1=a.right-base.left, y1=a.top-base.top+26, x2=b.left-base.left-4, y2=b.top-base.top+26, c=(x2-x1)/2;
+        const lit=li.classList.contains('is-path')&&box.querySelector('[data-sysd-hop="'+from+'"]').classList.contains('is-path');
+        return '<path class="sysd-lin-link'+(lit?' is-path':'')+'" d="M'+x1+' '+y1+' C'+(x1+c)+' '+y1+' '+(x2-c)+' '+y2+' '+x2+' '+y2+'" marker-end="url(#sysd-lin-arrow)"/>';
+      })).join('');
   }
 
-  const sysdGaps=[
-    ['NASA sources','24 of 38 image-only report pages have no text; OCR recovered 14 but is not adopted until it is labelled.'],
-    ['Intake','Second readings exist as a file but are empty; three numbers from teammates are unverified until Osman reads them (issue #5).'],
-    ['Data','Pressure is missing on many PSI rows, so the Habitat explorer places them on an oxygen-only strip.'],
-    ['Retrieval','Report search lets the 2015 Researcher’s Guide crowd out investigation reports; halving its score is tested and waiting (issue #7).'],
-    ['Models','Trend models are small fits on one investigation each; CFI-G ignition barely beats its base rate in cross-validation.'],
-    ['Checker','It checks numbers and words against fields, not meaning; a sentence can pass and still read oddly. 4 removals in the last run copied the word “withheld”.'],
-    ['Delivery','The public build uses saved explanations only; a pair with no saved explanation shows no model sentences.'],
-    ['Not built','No hosted API or review database; everything runs in one page and review state lives in files and git.']];
+  // ---- Checker: the real checkSentence(), rule by rule.
+  const sysdRules=[
+    ['complete','Complete sentence',/^Incomplete sentence/,'Fragments and trailing ellipses are removed.'],
+    ['cites','Cites fields that exist',/^(No field cited|Cites a field that does not exist|Fact ID left)/,'Every sentence must cite a numbered fact, and only facts that were given.'],
+    ['prompt','No prompt markers',/^(Copies a marker|Denies that a value)/,'Words like “withheld” or “(Disputed)” are prompt scaffolding, not findings.'],
+    ['cause','No causes or verdicts',/^(States a cause|Judges what)/,'The model compares fields; it never explains why or says what the data proves.'],
+    ['names','Names records exactly',/^(Names |Record name not|Pairs values with records)/,'Each record is named exactly, and only alongside one of its own cited fields.'],
+    ['numbers','Numbers and units match',/(is not in the|has a different unit|Gives a number|Gives numbers|Mentions “)/,'Every number must appear in the named record’s cited fields, with the same unit.'],
+    ['disputes','Disputes stay disputed',/(disputed|Repeats )/i,'A disputed value is never repeated, and a dispute is never invented or denied.'],
+    ['both','“Both” only when both say so',/(Says both|Compares unrelated|Sets |does not report)/,'“Both” needs a cited field from each record, and fields compared must be about the same thing.']];
+  function sysdCheckerFacts() {
+    const field=id=>runs[id]?.fields?.find(item=>/^Oxygen/.test(item[0]));
+    const other=Object.keys(runs).find(id=>id!=='B1'&&field(id));
+    const facts=[{id:'F1',record:runs.B1?.name||'BASS-II B1',field:field('B1')?.[0]||'Oxygen',value:field('B1')?.[1]||'',kind:''}];
+    if (other) facts.push({id:'F2',record:runs[other].name,field:field(other)[0],value:field(other)[1],kind:''});
+    return facts;
+  }
+  function sysdRunCheck(text) {
+    const facts=sysdCheckerFacts(), names=[...new Set(facts.map(f=>f.record))];
+    const cites=[...new Set((text.match(/\bF\d+\b/g)||[]))];
+    try { const result=checkSentence({text,cites},facts,names); return Array.isArray(result)?result:(result?.problems||[]); } catch { return null; }
+  }
+  const sysdVerdictHtml=problems=>!problems?'<span class="muted">checker unavailable</span>':problems.length?'<strong class="sysd-removed">Removed</strong>: '+sysdEsc(problems.join('; ')):'<strong class="sysd-passed">Shown</strong>';
+  const sysdPresets=[['Passes','BASS-II B1 burned in 22.2% oxygen. [F1]'],['Wrong number','BASS-II B1 burned in 21% oxygen. [F1]'],
+    ['States a cause','BASS-II B1 burned in 22.2% oxygen because the flame was small. [F1]'],['No citation','BASS-II B1 burned in 22.2% oxygen.'],
+    ['Name not exact','BASS II B1 burned in 22.2% oxygen. [F1]'],['Prompt marker','BASS-II B1 oxygen was withheld from the facts. [F1]']];
+  function sysdCheckerHtml(text) {
+    const facts=sysdCheckerFacts();
+    return '<div class="sysd-checker"><div class="sysd-check-input"><h3>Facts given to the model</h3><table class="sysd-fact-table"><thead><tr><th scope="col">ID</th><th scope="col">Record</th><th scope="col">Field</th><th scope="col">Value</th></tr></thead><tbody>'+
+      facts.map(f=>'<tr><td><code>'+f.id+'</code></td><td>'+sysdEsc(f.record)+'</td><td>'+sysdEsc(f.field)+'</td><td>'+sysdEsc(f.value)+'</td></tr>').join('')+'</tbody></table>'+
+      '<label class="sysd-label" for="sysd-sentence">A model sentence (cite facts as [F1])</label><textarea id="sysd-sentence" rows="3" spellcheck="false">'+sysdEsc(text)+'</textarea>'+
+      '<div class="sysd-chips" role="group" aria-label="Example sentences">'+sysdPresets.map(([label,value])=>'<button type="button" class="sysd-chip" data-sysd-preset="'+sysdEsc(value)+'" aria-pressed="'+(value===text)+'">'+sysdEsc(label)+'</button>').join('')+'</div></div>'+
+      '<div class="sysd-check-out" id="sysd-check-out" aria-live="polite">'+sysdCheckerResult(text)+'</div></div>';
+  }
+  function sysdCheckerResult(text) {
+    const problems=sysdRunCheck(text);
+    if (!problems) return '<p class="muted">The checker is not available on this page.</p>';
+    const hits=sysdRules.map(()=>[]);
+    problems.forEach(p=>{ const i=sysdRules.findIndex(rule=>rule[2].test(p)); hits[i<0?5:i].push(p); });
+    return '<h3>Rule by rule <span class="small muted">· live checkSentence() run</span></h3><ol class="sysd-rules">'+sysdRules.map((rule,i)=>
+      '<li class="sysd-rule '+(hits[i].length?'is-fail':'is-pass')+'" data-sysd-rule="'+rule[0]+'"><span class="sysd-rule-mark" aria-hidden="true">'+(hits[i].length?'✕':'✓')+'</span>'+
+      '<div><strong>'+sysdEsc(rule[1])+'</strong><span class="sr-only">: '+(hits[i].length?'fails':'passes')+'</span><p class="small muted">'+sysdEsc(rule[3])+'</p>'+
+      (hits[i].length?'<p class="small sysd-removed">'+sysdEsc(hits[i].join('; '))+'</p>':'')+'</div></li>').join('')+'</ol>'+
+      '<p class="sysd-verdict '+(problems.length?'is-fail':'is-pass')+'">'+(problems.length?'<strong>Removed.</strong> The sentence is dropped and its reason is shown under the comparison.':'<strong>Shown.</strong> The sentence appears with a “Flaregrain model” badge.')+'</p>';
+  }
 
+  // ---- Page.
+  const sysdViews=[['architecture','Architecture','C4 context, containers, components'],['flow','Request flow','UML sequence'],['lineage','Data lineage','One value, hop by hop'],
+    ['checker','Checker','The sentence rules, live'],['deployment','Deployment','Where it runs']];
+  function sysdStats() {
+    const stat=(n,label)=>'<li><strong>'+n+'</strong><span>'+label+'</span></li>';
+    return '<ul class="sysd-stats" aria-label="Live counts from this page">'+stat(archLayers.reduce((n,l)=>n+l.nodes.length,0),'components')+stat(archEdges.length,'flows')+
+      stat(psiCatalog.studies.length,'investigations')+stat(psiCatalog.runs.length.toLocaleString('en'),'table rows')+stat(Object.keys(runs).length,'checked records')+
+      stat(reportData.passages.length.toLocaleString('en'),'report passages')+stat(psiIssues.flagged_values,'flagged values')+
+      stat(Object.keys(savedExplanations.explanations||{}).length,'saved pairs')+'</ul>';
+  }
+  function sysdLegend(view) {
+    if (view==='checker'||view==='lineage') return '<div class="sysd-legend" aria-label="Legend"><div><h4>Provenance tier</h4><ul>'+
+      Object.entries(sysdTierNames).filter(([k])=>k!=='planned').map(([k,v])=>'<li><span class="sysd-tier-dot" data-tier="'+k+'"></span>'+sysdEsc(v)+'</li>').join('')+'</ul></div></div>';
+    const types=view==='deployment'?['external','data','script','view','test','model','deploy']:['person','system','external','table','doc','record','script','data','search','model','checker','badge','view','test','deploy','api'];
+    const edgeSample=kind=>'<svg viewBox="0 0 44 10" aria-hidden="true"><path class="sysd-e-line" data-kind="'+kind+'" d="M2 5H40" marker-end="url(#sysd-arr)"/></svg>';
+    return '<div class="sysd-legend" aria-label="Legend"><div><h4>Element</h4><ul>'+types.map(t=>'<li><svg viewBox="0 0 16 16" aria-hidden="true">'+sysdIcon(t,0,0)+'</svg>'+sysdEsc(sysdIconNames[t])+'</li>').join('')+'</ul></div>'+
+      '<div><h4>Flow</h4><ul>'+Object.entries(sysdKinds).map(([k,v])=>'<li class="sysd-legend-edge" data-kind="'+k+'">'+edgeSample(k)+sysdEsc(v)+'</li>').join('')+'</ul></div>'+
+      '<div><h4>Provenance tier</h4><ul>'+Object.entries(sysdTierNames).map(([k,v])=>'<li><span class="sysd-tier-dot" data-tier="'+k+'"></span>'+sysdEsc(v)+'</li>').join('')+'</ul></div>'+
+      '<div><h4>Grouping</h4><ul><li><span class="sysd-legend-box"></span>'+(view==='deployment'?'Machine or service (deployment node)':'Boundary: a layer or the system')+'</li><li><span class="sysd-legend-box is-planned"></span>Not built yet</li></ul></div></div>';
+  }
+  function sysdToolbar(s,g) {
+    const levels=[['context','Context'],['container','Containers'],['component','Components']];
+    const crumbs=levels.slice(0,levels.findIndex(([k])=>k===s.level)+1);
+    const layerChips=g.groups.filter(gr=>g.nodes.some(n=>n.group===gr.id)).map(gr=>[gr.id,gr.title]);
+    let html='<div class="sysd-tools">';
+    if (s.view==='architecture') html+='<nav class="sysd-crumbs" aria-label="Zoom level">'+crumbs.map(([k,label],i)=>i===crumbs.length-1?'<span aria-current="page">'+label+'</span>':'<button type="button" class="text-action" data-sysd-level="'+k+'">'+label+'</button><span aria-hidden="true">›</span>').join('')+'</nav>'+
+      '<div class="sysd-seg" role="group" aria-label="C4 level">'+levels.map(([k,label],i)=>'<button type="button" data-sysd-level="'+k+'" aria-pressed="'+(s.level===k)+'"><span aria-hidden="true">L'+(i+1)+'</span> '+label+'</button>').join('')+'</div>';
+    html+='<div class="sysd-search"><label class="sr-only" for="sysd-search">Find a part</label><input id="sysd-search" type="search" placeholder="Find a part, file or count" value="'+sysdEsc(s.search)+'" autocomplete="off"><span class="small muted" id="sysd-search-count" aria-live="polite"></span></div>';
+    if (s.view==='architecture'&&s.level==='component') html+='<div class="sysd-replay" role="group" aria-label="Replay"><label class="sr-only" for="sysd-replay">Replay</label><select id="sysd-replay">'+
+      Object.entries(sysdReplays).map(([k,r])=>'<option value="'+k+'"'+(s.replay===k?' selected':'')+'>'+sysdEsc(r.label)+'</option>').join('')+'</select>'+
+      '<button type="button" class="sysd-icon-btn" data-sysd-replay="prev" aria-label="Previous step">‹</button><button type="button" class="sysd-play" data-sysd-replay="play" aria-pressed="'+s.playing+'">'+(s.playing?'Pause':'Replay')+'</button>'+
+      '<button type="button" class="sysd-icon-btn" data-sysd-replay="next" aria-label="Next step">›</button><button type="button" class="text-action" data-sysd-replay="stop"'+(s.replayStep<0?' hidden':'')+'>Clear</button></div>';
+    html+='<div class="sysd-export" role="group" aria-label="Export"><button type="button" class="outline" data-sysd-export="svg">SVG</button><button type="button" class="outline" data-sysd-export="png">PNG</button></div></div>';
+    if (layerChips.length) html+='<div class="sysd-chips sysd-filters" role="group" aria-label="Show groups">'+layerChips.map(([id,title])=>'<button type="button" class="sysd-chip" data-sysd-filter="'+id+'" aria-pressed="'+!s.hidden.includes(id)+'">'+sysdEsc(title)+'</button>').join('')+'</div>';
+    html+='<div class="sysd-chips sysd-filters" role="group" aria-label="Show tiers">'+Object.entries(sysdTierNames).filter(([k])=>g.nodes.some(n=>n.tier===k)).map(([k,v])=>
+      '<button type="button" class="sysd-chip" data-sysd-filter="tier:'+k+'" aria-pressed="'+!s.hidden.includes('tier:'+k)+'"><span class="sysd-tier-dot" data-tier="'+k+'"></span>'+sysdEsc(v)+'</button>').join('')+'</div>';
+    return html;
+  }
+  function sysdStage(g) {
+    return '<div class="sysd-stage" id="sysd-stage" tabindex="0" aria-label="Diagram canvas. Arrow keys pan, plus and minus zoom, 0 fits.">'+sysdCanvasSvg(g)+
+      '<div class="sysd-zoom" role="group" aria-label="Zoom"><button type="button" data-sysd-zoom="in" aria-label="Zoom in">+</button><button type="button" data-sysd-zoom="out" aria-label="Zoom out">−</button><button type="button" data-sysd-zoom="fit" aria-label="Fit to view">⤢</button></div>'+
+      '<div class="sysd-minimap" aria-hidden="true">'+sysdMinimapSvg(g)+'</div><div class="sysd-tip" role="tooltip" id="sysd-tip" hidden></div>'+
+      '<p class="sysd-replay-caption" id="sysd-replay-caption" aria-live="polite"></p></div>'+
+      '<p class="small muted" id="sysd-canvas-help">Drag to pan · ⌘/Ctrl + scroll to zoom · select a box to light its path · arrow keys move between boxes · Enter opens · Esc goes back.</p>';
+  }
+  function sysdPanel(s) {
+    if (s.view==='flow') return '<div class="sysd-tools"><div class="sysd-seg" role="group" aria-label="Build">'+[['public','Public build (no model)'],['local','Local build (model and checker)']].map(([k,label])=>
+      '<button type="button" data-sysd-flow="'+k+'" aria-pressed="'+(s.flow===k)+'">'+label+'</button>').join('')+'</div>'+
+      '<div class="sysd-replay" role="group" aria-label="Step through"><button type="button" class="sysd-icon-btn" data-sysd-step="prev" aria-label="Previous step">‹</button><button type="button" class="sysd-play" data-sysd-step="play" aria-pressed="'+s.playing+'">'+(s.playing?'Pause':'Play')+'</button><button type="button" class="sysd-icon-btn" data-sysd-step="next" aria-label="Next step">›</button></div>'+
+      '<div class="sysd-export" role="group" aria-label="Export"><button type="button" class="outline" data-sysd-export="svg">SVG</button><button type="button" class="outline" data-sysd-export="png">PNG</button></div></div>'+
+      '<div class="sysd-layout"><figure class="sysd-figure sysd-seq-figure">'+sysdSequenceSvg(s.flow,s.flowStep)+'</figure><aside class="sysd-detail" id="sysd-detail" aria-live="polite" aria-labelledby="sysd-detail-title">'+sysdFlowDetail(s.flow,s.flowStep)+'</aside></div>';
+    if (s.view==='lineage') return sysdLineageHtml(s.lineage,s.hop);
+    if (s.view==='checker') return sysdCheckerHtml(s.checkText||sysdPresets[0][1]);
+    const g=sysdGraph();
+    return sysdToolbar(s,g)+'<div class="sysd-layout"><figure class="sysd-figure">'+sysdStage(g)+'</figure><aside class="sysd-detail" id="sysd-detail" aria-live="polite" aria-labelledby="sysd-detail-title">'+sysdDetail(g,s.selected)+'</aside></div>';
+  }
   function renderSystem() {
-    const selected=state.systemNode||'';
-    const mode=state.systemFlow||(publicBuild?'public':'local');
+    const s=sysdS();
+    sysdStopReplay();
     main.innerHTML='<article class="inner-page system-page sysd-page"><div class="inner-heading"><h1>System design</h1></div>'+
-      '<p class="lead muted">How Flaregrain is built today: seven layers from NASA’s sources to this page. Counts are read live from the data in this page.</p>'+
-      '<section id="system-content" class="inner-section" aria-labelledby="sysd-layers-title"><h2 id="sysd-layers-title">How Flaregrain is built</h2>'+
-      '<div class="sysd-layout"><figure class="sysd-figure">'+archDiagram(selected)+'<figcaption class="small muted">Solid boxes run today; the dashed band is not built yet. Select a box for detail; arrows light up for its inputs and outputs.</figcaption></figure>'+
-      '<aside class="sysd-detail" id="sysd-detail" aria-live="polite" aria-labelledby="sysd-detail-title">'+archDetail(selected)+'</aside></div></section>'+
-      '<section class="inner-section" aria-labelledby="sysd-flow-title"><h2 id="sysd-flow-title">What happens when you ask a question</h2>'+
-      '<div class="sysd-toggle" role="group" aria-label="Build">'+[['public','Public build (no model)'],['local','Local build (model and checker)']].map(([key,label])=>
-        '<button type="button" data-sysd-flow="'+key+'" aria-pressed="'+(mode===key)+'">'+label+'</button>').join('')+'</div>'+sysdSequence(mode)+'</section>'+
-      '<section class="inner-section" aria-labelledby="sysd-trace-title"><h2 id="sysd-trace-title">Trace one value: BASS-II B1’s oxygen</h2>'+
-      '<p class="small muted">The same number at each hop, from NASA’s page to a sentence the checker allows. The checker step runs on this page now.</p>'+sysdTrace()+'</section>'+
-      '<section class="inner-section" aria-labelledby="sysd-gaps-title"><h2 id="sysd-gaps-title">Known gaps</h2><p class="small">'+provenanceBadge('reading')+' The team’s own reading of each layer’s limits.</p>'+
-      '<dl class="sysd-gaps">'+sysdGaps.map(([layer,text])=>'<dt>'+escapeText(layer)+'</dt><dd>'+escapeText(text)+'</dd>').join('')+'</dl></section></article>';
+      '<p class="lead muted">How Flaregrain is built today, drawn the way engineering teams document systems: C4 levels from context down to components, a request sequence, the lineage of single values, the checker’s rules and where each part runs. Counts are read live from the data in this page.</p>'+
+      '<section id="system-content" class="inner-section" aria-labelledby="sysd-title"><h2 id="sysd-title">How Flaregrain is built</h2>'+sysdStats()+
+      '<div class="sysd-tabs" role="tablist" aria-label="System design views">'+sysdViews.map(([k,label,sub])=>'<button type="button" role="tab" id="sysd-tab-'+k+'" aria-controls="sysd-panel" aria-selected="'+(s.view===k)+'" tabindex="'+(s.view===k?0:-1)+'" data-sysd-view="'+k+'"><span>'+label+'</span><small>'+sub+'</small></button>').join('')+'</div>'+
+      '<div class="sysd-panel" id="sysd-panel" role="tabpanel" aria-labelledby="sysd-tab-'+s.view+'">'+sysdPanel(s)+'</div>'+sysdLegend(s.view)+'</section></article>';
+    sysdMount();
   }
 
-  function selectArchNode(id) {
-    state.systemNode=state.systemNode===id?'':id;
-    renderSystem();
-    main.querySelector('[data-arch-node="'+state.systemNode+'"]')?.focus();
-    if (state.systemNode) announce('Showing '+archNode(state.systemNode)?.label+'.');
+  // ---- Canvas behaviour: camera, path highlight, search, filters, tooltip, minimap, replay.
+  let sysdCam=null, sysdG=null, sysdResize=null;
+  function sysdMount() {
+    const s=sysdS();
+    sysdResize?.disconnect(); sysdResize=null;
+    if (s.view==='lineage') { requestAnimationFrame(sysdDrawLineage); sysdResize=new ResizeObserver(()=>sysdDrawLineage()); sysdResize.observe(main.querySelector('.sysd-lineage')); return; }
+    if (s.view==='checker') { sysdAnimateRules(); return; }
+    const svg=main.querySelector('svg.sysd-canvas'); if (!svg) return;
+    sysdG=sysdGraph();
+    sysdCam=null;
+    sysdFit(false);
+    sysdApply();
+    sysdResize=new ResizeObserver(()=>{ if (sysdCam) sysdSetCam(sysdCam,false); }); sysdResize.observe(main.querySelector('#sysd-stage'));
+    if (s.replayStep>=0) sysdReplayShow(s.replayStep,false);
   }
+  function sysdStageSize() { const r=main.querySelector('#sysd-stage')?.getBoundingClientRect(); return r&&r.width?r:{width:1000,height:620}; }
+  function sysdSetCam(cam,animate) {
+    const svg=main.querySelector('svg.sysd-canvas'); if (!svg||!sysdG) return;
+    const {width,height}=sysdStageSize(), aspect=width/height, cx=cam.x+cam.w/2, cy=cam.y+cam.h/2;
+    let w=Math.min(Math.max(cam.w,sysdG.W*0.12),sysdG.W*2.2), h=Math.max(cam.h*(w/cam.w),1);
+    if (w/h<aspect) w=h*aspect; else h=w/aspect;
+    const next={x:cx-w/2,y:cy-h/2,w,h};
+    const apply=c=>{ svg.setAttribute('viewBox',c.x.toFixed(1)+' '+c.y.toFixed(1)+' '+c.w.toFixed(1)+' '+c.h.toFixed(1));
+      const v=main.querySelector('.sysd-mm-view'); if (v) { v.setAttribute('x',c.x); v.setAttribute('y',c.y); v.setAttribute('width',c.w); v.setAttribute('height',c.h); } };
+    if (animate&&sysdMotion()&&sysdCam) { const from={...sysdCam}; gsap.killTweensOf(from); gsap.to(from,{...next,duration:.55,ease:'power2.inOut',onUpdate:()=>apply(from)}); }
+    else apply(next);
+    sysdCam=next;
+  }
+  // Fit the whole diagram, top-aligned so spare height falls below it (where the minimap sits).
+  function sysdFit(animate) {
+    const {width,height}=sysdStageSize(), w=sysdG.W+48, h=sysdG.H+48, aspect=width/height;
+    const cam=w/h>aspect?{x:-24,y:-24,w,h:w/aspect}:{x:-24-(h*aspect-w)/2,y:-24,w:h*aspect,h};
+    sysdSetCam(cam,animate);
+  }
+  function sysdFocusBox(box,animate) { const pad=60; sysdSetCam({x:box.x-pad,y:box.y-pad,w:box.w+2*pad,h:box.h+2*pad},animate); }
+  function sysdZoom(factor,px,py) {
+    if (!sysdCam) return;
+    const cx=px??sysdCam.x+sysdCam.w/2, cy=py??sysdCam.y+sysdCam.h/2;
+    sysdSetCam({x:cx-(cx-sysdCam.x)*factor,y:cy-(cy-sysdCam.y)*factor,w:sysdCam.w*factor,h:sysdCam.h*factor},false);
+    sysdCam={...sysdCam};
+  }
+  function sysdPaths(id) {
+    const up=new Set(), down=new Set(), edges=sysdG.edges;
+    const walk=(start,set,dir)=>{ const queue=[start]; while (queue.length) { const cur=queue.shift();
+      edges.forEach(e=>{ if (e.loop&&start!==e.from&&start!==e.to) return; const [a,b]=dir?[e.from,e.to]:[e.to,e.from]; if (a===cur&&!set.has(b)&&b!==id) { set.add(b); queue.push(b); } }); } };
+    walk(id,down,true); walk(id,up,false);
+    return {up,down};
+  }
+  function sysdMatches() {
+    const s=sysdS(), q=s.search.trim().toLowerCase();
+    return new Set(sysdG.nodes.filter(n=>!s.hidden.includes(n.group||'')&&!s.hidden.includes('tier:'+n.tier)&&(!q||(n.search||n.label).toLowerCase().includes(q)||(n.count||'').toLowerCase().includes(q))).map(n=>n.id));
+  }
+  function sysdApply() {
+    const s=sysdS(), svg=main.querySelector('svg.sysd-canvas'); if (!svg||!sysdG) return;
+    const sel=sysdG.nodes.some(n=>n.id===s.selected)?s.selected:'';
+    const paths=sel?sysdPaths(sel):null, matches=sysdMatches(), filtering=matches.size<sysdG.nodes.length;
+    svg.classList.toggle('has-focus',!!sel); svg.classList.toggle('has-filter',filtering);
+    let first=null;
+    svg.querySelectorAll('[data-sysd-node]').forEach(el=>{ const id=el.dataset.sysdNode;
+      el.classList.toggle('is-sel',id===sel); el.setAttribute('aria-pressed',String(id===sel));
+      el.classList.toggle('is-path',!!paths&&(id===sel||paths.up.has(id)||paths.down.has(id)));
+      el.classList.toggle('is-match',matches.has(id)); el.classList.toggle('is-out',!matches.has(id));
+      if (!first&&matches.has(id)) first=el; });
+    const focusable=svg.querySelector('[data-sysd-node="'+sel+'"]')||first||svg.querySelector('[data-sysd-node]');
+    svg.querySelectorAll('[data-sysd-node]').forEach(el=>el.setAttribute('tabindex',el===focusable?'0':'-1'));
+    svg.querySelectorAll('[data-sysd-edge]').forEach(el=>{ const {from,to}=el.dataset, i=el.dataset.sysdEdge;
+      const lit=!!paths&&((paths.up.has(from)&&(paths.up.has(to)||to===sel))||((paths.down.has(from)||from===sel)&&paths.down.has(to)));
+      el.classList.toggle('is-path',lit); el.classList.toggle('is-out',!(matches.has(from)&&matches.has(to)));
+      svg.querySelector('[data-sysd-edge-label="'+i+'"]')?.classList.toggle('is-path',lit); });
+    main.querySelectorAll('[data-mm-node]').forEach(el=>el.classList.toggle('is-out',!matches.has(el.dataset.mmNode)));
+    const count=main.querySelector('#sysd-search-count');
+    if (count) count.textContent=filtering?matches.size+' of '+sysdG.nodes.length+' shown':'';
+  }
+  function sysdSelect(id,{focus=true,center=false}={}) {
+    const s=sysdS();
+    s.selected=s.selected===id&&!center?'':id;
+    sysdApply();
+    const detail=main.querySelector('#sysd-detail'); if (detail) detail.innerHTML=sysdDetail(sysdG,s.selected);
+    const el=main.querySelector('[data-sysd-node="'+id+'"]');
+    if (focus) el?.focus({preventScroll:true});
+    if (center&&el) { const n=sysdG.nodes.find(item=>item.id===id); sysdFocusBox({x:n.x-160,y:n.y-120,w:n.w+320,h:n.h+240},true); }
+    if (s.selected) announce('Showing '+(sysdG.nodes.find(n=>n.id===s.selected)?.label||'')+'.');
+  }
+  function sysdDrill(target) {
+    const s=sysdS();
+    sysdStopReplay();
+    if (target==='container') { s.level='container'; s.selected=''; }
+    else { s.level='component'; s.selected=''; s.focusGroup=target; }
+    sysdRerenderPanel();
+    if (target!=='container') { const gr=sysdG.groups.find(item=>item.id===target);
+      if (gr) { sysdFit(false); requestAnimationFrame(()=>sysdFocusBox(gr,true)); } }
+    sysdEnter();
+    main.querySelector('[data-sysd-node][tabindex="0"]')?.focus({preventScroll:true});
+    announce('Opened '+(target==='container'?'containers':archLayers.find(l=>l.id===target)?.title+' components')+'.');
+  }
+  function sysdUp() {
+    const s=sysdS(); if (s.view!=='architecture') return false;
+    if (s.level==='component') s.level='container'; else if (s.level==='container') s.level='context'; else return false;
+    s.selected=''; sysdStopReplay(); sysdRerenderPanel(); sysdEnter(); main.querySelector('#sysd-stage')?.focus({preventScroll:true}); return true;
+  }
+  function sysdEnter() {
+    const world=main.querySelector('.sysd-world');
+    if (world&&sysdMotion()) gsap.fromTo(world,{opacity:0,scale:.97,transformOrigin:'50% 50%'},{opacity:1,scale:1,duration:.38,ease:'power2.out'});
+  }
+  function sysdRerenderPanel() {
+    const s=sysdS(), panel=main.querySelector('#sysd-panel'); if (!panel) return renderSystem();
+    panel.innerHTML=sysdPanel(s);
+    const legend=main.querySelector('.sysd-legend'); if (legend) legend.outerHTML=sysdLegend(s.view);
+    sysdMount();
+  }
+  function sysdTip(el,event) {
+    const tip=main.querySelector('#sysd-tip'), stage=main.querySelector('#sysd-stage'); if (!tip||!stage) return;
+    if (!el) { tip.hidden=true; return; }
+    const n=sysdG.nodes.find(item=>item.id===el.dataset.sysdNode); if (!n) return;
+    const ins=sysdG.edges.filter(e=>e.to===n.id).length, outs=sysdG.edges.filter(e=>e.from===n.id).length;
+    tip.innerHTML='<strong>'+sysdEsc(n.label)+'</strong><span class="sysd-tip-tech">'+sysdEsc(n.tech)+'</span>'+(n.count?'<span>'+sysdEsc(n.count)+'</span>':'')+
+      '<span class="sysd-tip-meta"><span class="sysd-tier-dot" data-tier="'+n.tier+'"></span>'+sysdEsc(sysdTierNames[n.tier])+' · '+ins+' in · '+outs+' out</span>';
+    tip.hidden=false;
+    const sr=stage.getBoundingClientRect(), er=el.getBoundingClientRect();
+    let x=event?.clientX!=null?event.clientX-sr.left+14:er.right-sr.left+8, y=event?.clientY!=null?event.clientY-sr.top+14:er.top-sr.top;
+    x=Math.min(x,sr.width-tip.offsetWidth-8); y=Math.min(y,sr.height-tip.offsetHeight-8);
+    tip.style.transform='translate('+Math.max(8,x)+'px,'+Math.max(8,y)+'px)';
+  }
+  function sysdReplayShow(i,animate) {
+    const s=sysdS(), steps=sysdReplays[s.replay].steps, svg=main.querySelector('svg.sysd-canvas'); if (!svg) return;
+    s.replayStep=i;
+    svg.classList.toggle('has-replay',i>=0);
+    svg.querySelectorAll('.is-replay,.is-replayed').forEach(el=>el.classList.remove('is-replay','is-replayed'));
+    const caption=main.querySelector('#sysd-replay-caption');
+    main.querySelector('[data-sysd-replay="stop"]')?.toggleAttribute('hidden',i<0);
+    const pulse=svg.querySelector('.sysd-pulse');
+    if (i<0) { if (caption) caption.textContent=''; pulse?.setAttribute('cx','-99'); return; }
+    steps.forEach(([from,to],k)=>{ if (k>i) return;
+      const edge=svg.querySelector('[data-sysd-edge][data-from="'+from+'"][data-to="'+to+'"]')||svg.querySelector('[data-sysd-edge][data-from="'+to+'"][data-to="'+from+'"]');
+      edge?.classList.add(k===i?'is-replay':'is-replayed');
+      if (k===i&&edge) svg.querySelector('[data-sysd-edge-label="'+edge.dataset.sysdEdge+'"]')?.classList.add('is-replay');
+      [from,to].forEach(id=>svg.querySelector('[data-sysd-node="'+id+'"]')?.classList.add(k===i?'is-replay':'is-replayed')); });
+    if (caption) caption.innerHTML='<strong>'+(i+1)+' / '+steps.length+'</strong> '+sysdEsc(steps[i][2]);
+    const [from,to]=steps[i];
+    const line=svg.querySelector('[data-sysd-edge][data-from="'+from+'"][data-to="'+to+'"] .sysd-e-line'), back=!line;
+    const path=line||svg.querySelector('[data-sysd-edge][data-from="'+to+'"][data-to="'+from+'"] .sysd-e-line');
+    if (!path||!pulse) return;
+    const len=path.getTotalLength(), at=t=>{ const p=path.getPointAtLength(len*(back?1-t:t)); pulse.setAttribute('cx',p.x); pulse.setAttribute('cy',p.y); };
+    sysdPulseTween?.kill(); sysdPulseTween=null;
+    if (animate&&sysdMotion()) { const prog={t:0}; sysdPulseTween=gsap.to(prog,{t:1,duration:.9,ease:'power1.inOut',onUpdate:()=>at(prog.t)}); }
+    else at(1);
+  }
+  function sysdReplayPlay() {
+    const s=sysdS(), steps=sysdReplays[s.replay].steps;
+    if (!s.playing) return;
+    if (s.replayStep>=steps.length-1) { s.playing=false; sysdPlayButton(); return; }
+    sysdReplayShow(s.replayStep+1,true);
+    sysdTimer=setTimeout(sysdReplayPlay,sysdMotion()?1500:1800);
+  }
+  function sysdPlayButton() { const s=sysdS(), b=main.querySelector('[data-sysd-replay="play"],[data-sysd-step="play"]');
+    if (b) { b.setAttribute('aria-pressed',String(s.playing)); b.textContent=s.playing?'Pause':(s.view==='flow'?'Play':'Replay'); } }
+  function sysdFlowShow(k) {
+    const s=sysdS(); s.flowStep=k;
+    const fig=main.querySelector('.sysd-seq-figure'); if (!fig) return;
+    fig.innerHTML=sysdSequenceSvg(s.flow,k);
+    main.querySelector('#sysd-detail').innerHTML=sysdFlowDetail(s.flow,k);
+    const active=fig.querySelector('.sysd-msg-g.is-active');
+    if (active&&sysdMotion()) gsap.from(active.querySelectorAll('.sysd-msg,.sysd-msg-label'),{opacity:0,x:-12,duration:.35,ease:'power2.out'});
+  }
+  function sysdFlowPlay() {
+    const s=sysdS(), n=sysdFlows[s.flow].steps.length;
+    if (!s.playing) return;
+    if (s.flowStep>=n-1) { s.playing=false; sysdPlayButton(); return; }
+    sysdFlowShow(s.flowStep+1);
+    sysdTimer=setTimeout(sysdFlowPlay,1400);
+  }
+  function sysdAnimateRules() {
+    if (!sysdMotion()) return;
+    const rules=main.querySelectorAll('.sysd-rule'); if (rules.length) gsap.from(rules,{opacity:0,x:-10,duration:.28,stagger:.05,ease:'power2.out'});
+  }
+
+  // ---- Export: the whole current diagram as a standalone SVG (styles inlined), or a 2× PNG.
+  function sysdExport(format) {
+    const svg=main.querySelector('#sysd-canvas'); if (!svg) return;
+    const clone=svg.cloneNode(true), g=sysdG, seq=svg.classList.contains('sysd-sequence');
+    const vb=seq?svg.getAttribute('viewBox').split(' ').map(Number):[-24,-24,g.W+48,g.H+48];
+    const props=['fill','fill-opacity','stroke','stroke-width','stroke-dasharray','stroke-linecap','stroke-opacity','opacity','font-size','font-weight','font-family','font-style','paint-order','stroke-linejoin','marker-end','marker-start','display','visibility'];
+    const src=[svg,...svg.querySelectorAll('*')], dst=[clone,...clone.querySelectorAll('*')];
+    src.forEach((el,i)=>{ const cs=getComputedStyle(el); dst[i].setAttribute('style',props.map(p=>p+':'+cs.getPropertyValue(p)).join(';')); });
+    clone.querySelectorAll('.sysd-pulse,.sysd-e-hit,.sysd-msg-hit').forEach(el=>el.remove());
+    clone.setAttribute('viewBox',vb.join(' ')); clone.setAttribute('width',vb[2]); clone.setAttribute('height',vb[3]);
+    clone.setAttribute('xmlns','http://www.w3.org/2000/svg');
+    clone.insertAdjacentHTML('afterbegin','<rect x="'+vb[0]+'" y="'+vb[1]+'" width="'+vb[2]+'" height="'+vb[3]+'" fill="'+getComputedStyle(document.body).backgroundColor+'"/>');
+    const text=new XMLSerializer().serializeToString(clone);
+    const name='flaregrain-'+(seq?'request-flow-'+sysdS().flow:sysdG.key)+'.'+format;
+    const save=blob=>{ const a=document.createElement('a'); a.href=URL.createObjectURL(blob); a.download=name; document.body.append(a); a.click(); a.remove(); setTimeout(()=>URL.revokeObjectURL(a.href),2000); announce('Saved '+name+'.'); };
+    if (format==='svg') return save(new Blob([text],{type:'image/svg+xml'}));
+    const img=new Image(), url=URL.createObjectURL(new Blob([text],{type:'image/svg+xml'}));
+    img.onload=()=>{ const c=document.createElement('canvas'); c.width=vb[2]*2; c.height=vb[3]*2; const ctx=c.getContext('2d'); ctx.scale(2,2); ctx.drawImage(img,0,0,vb[2],vb[3]); URL.revokeObjectURL(url); c.toBlob(save,'image/png'); };
+    img.src=url;
+  }
+
+  // ---- Events (delegated; scoped to the System design page).
+  const sysdOn=event=>event.target.closest?.('.sysd-page');
+  let sysdDrag=null;
   document.addEventListener('click',event=>{
-    const node=event.target.closest('[data-arch-node]');
-    if (node) { selectArchNode(node.dataset.archNode); return; }
-    const flow=event.target.closest('[data-sysd-flow]');
-    if (flow) { state.systemFlow=flow.dataset.sysdFlow; renderSystem(); main.querySelector('[data-sysd-flow="'+state.systemFlow+'"]')?.focus(); }
+    if (!sysdOn(event)) return;
+    const s=sysdS(), t=event.target;
+    const view=t.closest('[data-sysd-view]'); if (view) { sysdStopReplay(); s.view=view.dataset.sysdView; s.selected=''; s.search=''; renderSystem(); main.querySelector('[data-sysd-view="'+s.view+'"]')?.focus(); return; }
+    const node=t.closest('[data-sysd-node]');
+    if (node) { if (sysdDrag?.moved) return; const id=node.dataset.sysdNode;
+      return sysdSelect(id); }
+    const level=t.closest('[data-sysd-level]'); if (level) { s.level=level.dataset.sysdLevel; s.selected=''; sysdStopReplay(); s.replayStep=-1; sysdRerenderPanel(); sysdEnter(); main.querySelector('[data-sysd-level="'+s.level+'"]')?.focus(); return; }
+    const drill=t.closest('[data-sysd-drill]'); if (drill) return sysdDrill(drill.dataset.sysdDrill);
+    const open=t.closest('[data-sysd-open]'); if (open) { const id=open.dataset.sysdOpen; sysdStopReplay(); s.view='architecture'; s.level='component'; s.search=''; s.hidden=[]; s.selected='';
+      renderSystem(); sysdSelect(id,{center:true}); return; }
+    const go=t.closest('[data-sysd-goto]'); if (go) return sysdSelect(go.dataset.sysdGoto,{center:true});
+    const zoom=t.closest('[data-sysd-zoom]'); if (zoom) { const z=zoom.dataset.sysdZoom; if (z==='fit') sysdFit(true); else { const c=sysdCam; sysdSetCam({x:c.x+c.w*(z==='in'?.15:-.15),y:c.y+c.h*(z==='in'?.15:-.15),w:c.w*(z==='in'?.7:1.3),h:c.h*(z==='in'?.7:1.3)},true); } return; }
+    const filter=t.closest('[data-sysd-filter]'); if (filter) { const k=filter.dataset.sysdFilter; s.hidden=s.hidden.includes(k)?s.hidden.filter(x=>x!==k):[...s.hidden,k];
+      filter.setAttribute('aria-pressed',String(!s.hidden.includes(k))); sysdApply(); return; }
+    const rep=t.closest('[data-sysd-replay]'); if (rep) { const a=rep.dataset.sysdReplay, n=sysdReplays[s.replay].steps.length;
+      if (a==='play') { s.playing=!s.playing; if (s.playing) { if (s.replayStep>=n-1) s.replayStep=-1; s.selected=''; sysdApply(); main.querySelector('#sysd-detail').innerHTML=sysdDetail(sysdG,''); sysdReplayPlay(); } else clearTimeout(sysdTimer); sysdPlayButton(); }
+      else if (a==='stop') { sysdStopReplay(); sysdPlayButton(); sysdReplayShow(-1); }
+      else { sysdStopReplay(); sysdPlayButton(); if (s.selected) { s.selected=''; sysdApply(); main.querySelector('#sysd-detail').innerHTML=sysdDetail(sysdG,''); } sysdReplayShow(Math.max(0,Math.min(n-1,s.replayStep+(a==='next'?1:-1))),true); }
+      return; }
+    const flow=t.closest('[data-sysd-flow]'); if (flow) { sysdStopReplay(); s.flow=flow.dataset.sysdFlow; s.flowStep=-1; sysdRerenderPanel(); main.querySelector('[data-sysd-flow="'+s.flow+'"]')?.focus(); return; }
+    const step=t.closest('[data-sysd-step]'); if (step) { const a=step.dataset.sysdStep, n=sysdFlows[s.flow].steps.length;
+      if (a==='play') { s.playing=!s.playing; if (s.playing) { if (s.flowStep>=n-1) s.flowStep=-1; sysdFlowPlay(); } else clearTimeout(sysdTimer); sysdPlayButton(); }
+      else { sysdStopReplay(); sysdPlayButton(); sysdFlowShow(Math.max(0,Math.min(n-1,s.flowStep+(a==='next'?1:-1)))); }
+      return; }
+    const msg=t.closest('[data-sysd-msg]'); if (msg) { sysdStopReplay(); sysdPlayButton(); const k=+msg.dataset.sysdMsg; sysdFlowShow(s.flowStep===k?-1:k); main.querySelector('[data-sysd-msg="'+k+'"]')?.focus(); return; }
+    const lin=t.closest('[data-sysd-lineage]'); if (lin) { s.lineage=lin.dataset.sysdLineage; s.hop=''; sysdRerenderPanel(); main.querySelector('[data-sysd-lineage="'+s.lineage+'"]')?.focus(); return; }
+    const hop=t.closest('.sysd-hop-head'); if (hop) { const id=hop.closest('[data-sysd-hop]').dataset.sysdHop; s.hop=s.hop===id?'':id; sysdRerenderPanel(); main.querySelector('[data-sysd-hop="'+id+'"] .sysd-hop-head')?.focus(); return; }
+    const preset=t.closest('[data-sysd-preset]'); if (preset) { s.checkText=preset.dataset.sysdPreset; const area=main.querySelector('#sysd-sentence'); area.value=s.checkText;
+      main.querySelectorAll('[data-sysd-preset]').forEach(b=>b.setAttribute('aria-pressed',String(b===preset))); main.querySelector('#sysd-check-out').innerHTML=sysdCheckerResult(s.checkText); sysdAnimateRules(); return; }
+    const exp=t.closest('[data-sysd-export]'); if (exp) return sysdExport(exp.dataset.sysdExport);
+    const mm=t.closest('.sysd-minimap'); if (mm) return;
   });
+  document.addEventListener('dblclick',event=>{ const node=sysdOn(event)&&event.target.closest('[data-sysd-node]'); if (node) { const n=sysdG?.nodes.find(item=>item.id===node.dataset.sysdNode); if (n?.drill) sysdDrill(n.drill); } });
+  document.addEventListener('input',event=>{
+    if (!sysdOn(event)) return;
+    const s=sysdS();
+    if (event.target.id==='sysd-search') { s.search=event.target.value; sysdApply(); }
+    if (event.target.id==='sysd-sentence') { s.checkText=event.target.value; clearTimeout(sysdTimer);
+      sysdTimer=setTimeout(()=>{ const out=main.querySelector('#sysd-check-out'); if (out) out.innerHTML=sysdCheckerResult(s.checkText);
+        main.querySelectorAll('[data-sysd-preset]').forEach(b=>b.setAttribute('aria-pressed',String(b.dataset.sysdPreset===s.checkText))); },180); }
+  });
+  document.addEventListener('change',event=>{ if (sysdOn(event)&&event.target.id==='sysd-replay') { sysdStopReplay(); sysdS().replay=event.target.value; sysdPlayButton(); sysdReplayShow(-1); } });
   document.addEventListener('keydown',event=>{
-    const node=event.target.closest?.('[data-arch-node]');
-    if (node&&(event.key==='Enter'||event.key===' ')) { event.preventDefault(); selectArchNode(node.dataset.archNode); }
+    if (!sysdOn(event)) return;
+    const s=sysdS(), t=event.target;
+    const tab=t.closest?.('[data-sysd-view]');
+    if (tab&&/^Arrow(Left|Right)$|^Home$|^End$/.test(event.key)) { event.preventDefault();
+      const keys=sysdViews.map(([k])=>k), i=keys.indexOf(tab.dataset.sysdView);
+      const next=event.key==='Home'?0:event.key==='End'?keys.length-1:(i+(event.key==='ArrowRight'?1:-1)+keys.length)%keys.length;
+      main.querySelector('[data-sysd-view="'+keys[next]+'"]').click(); return; }
+    if (t.id==='sysd-search'&&event.key==='Enter') { event.preventDefault(); const first=[...sysdMatches()][0]; if (first) sysdSelect(first,{center:true}); return; }
+    const msg=t.closest?.('[data-sysd-msg]'); if (msg&&(event.key==='Enter'||event.key===' ')) { event.preventDefault(); msg.dispatchEvent(new MouseEvent('click',{bubbles:true})); return; }
+    const node=t.closest?.('[data-sysd-node]');
+    if (node) {
+      const id=node.dataset.sysdNode, n=sysdG.nodes.find(item=>item.id===id);
+      if (event.key==='Enter'||event.key===' ') { event.preventDefault(); if (s.selected===id&&n?.drill) sysdDrill(n.drill); else sysdSelect(id); return; }
+      if (event.key==='Escape') { event.preventDefault(); if (s.selected) sysdSelect(s.selected); else sysdUp(); return; }
+      const dir={ArrowRight:[1,0],ArrowLeft:[-1,0],ArrowDown:[0,1],ArrowUp:[0,-1]}[event.key];
+      if (dir) { event.preventDefault();
+        const cx=n.x+n.w/2, cy=n.y+n.h/2, visible=sysdMatches();
+        const best=sysdG.nodes.filter(o=>o.id!==id&&visible.has(o.id)).map(o=>{ const dx=o.x+o.w/2-cx, dy=o.y+o.h/2-cy, along=dx*dir[0]+dy*dir[1], across=Math.abs(dx*dir[1]-dy*dir[0]);
+          return {o,score:along>8?along+across*2.2:Infinity}; }).sort((a,b)=>a.score-b.score)[0];
+        if (best&&best.score<Infinity) { node.setAttribute('tabindex','-1'); const el=main.querySelector('[data-sysd-node="'+best.o.id+'"]'); el.setAttribute('tabindex','0'); el.focus({preventScroll:true}); sysdTip(el); }
+        return; }
+      return;
+    }
+    if (t.id==='sysd-stage') {
+      const pan={ArrowRight:[.12,0],ArrowLeft:[-.12,0],ArrowDown:[0,.12],ArrowUp:[0,-.12]}[event.key];
+      if (pan&&sysdCam) { event.preventDefault(); sysdSetCam({...sysdCam,x:sysdCam.x+sysdCam.w*pan[0],y:sysdCam.y+sysdCam.h*pan[1]},false); return; }
+      if (event.key==='+'||event.key==='=') { event.preventDefault(); sysdZoom(.8); return; }
+      if (event.key==='-'||event.key==='_') { event.preventDefault(); sysdZoom(1.25); return; }
+      if (event.key==='0') { event.preventDefault(); sysdFit(true); return; }
+      if (event.key==='Escape') { event.preventDefault(); sysdUp(); return; }
+    }
   });
+  document.addEventListener('focusin',event=>{ const node=sysdOn(event)&&event.target.closest('[data-sysd-node]'); if (node) sysdTip(node); });
+  document.addEventListener('focusout',event=>{ if (sysdOn(event)&&event.target.closest('[data-sysd-node]')) sysdTip(null); });
+  document.addEventListener('pointerover',event=>{ const node=sysdOn(event)&&event.target.closest('[data-sysd-node]'); if (node) sysdTip(node,event); });
+  document.addEventListener('pointerout',event=>{ if (sysdOn(event)&&event.target.closest('[data-sysd-node]')&&!event.relatedTarget?.closest?.('[data-sysd-node]')) sysdTip(null); });
+  document.addEventListener('wheel',event=>{
+    const stage=sysdOn(event)&&event.target.closest('#sysd-stage'); if (!stage||!(event.ctrlKey||event.metaKey)||!sysdCam) return;
+    event.preventDefault();
+    const svg=stage.querySelector('svg'), p=new DOMPoint(event.clientX,event.clientY).matrixTransform(svg.getScreenCTM().inverse());
+    sysdZoom(Math.exp(event.deltaY*0.0022),p.x,p.y);
+  },{passive:false});
+  document.addEventListener('pointerdown',event=>{
+    if (!sysdOn(event)||event.button!==0) return;
+    const mm=event.target.closest('.sysd-minimap');
+    const stage=event.target.closest('#sysd-stage');
+    if (!stage||event.target.closest('.sysd-zoom')) return;
+    const svg=mm?mm.querySelector('svg'):stage.querySelector('svg.sysd-canvas'); if (!svg||!sysdCam) return;
+    sysdDrag={mm:!!mm,x:event.clientX,y:event.clientY,cam:{...sysdCam},moved:false,id:event.pointerId,ctm:svg.getScreenCTM().inverse(),svg};
+    if (mm) { const p=new DOMPoint(event.clientX,event.clientY).matrixTransform(sysdDrag.ctm); sysdSetCam({...sysdCam,x:p.x-sysdCam.w/2,y:p.y-sysdCam.h/2},false); }
+  });
+  document.addEventListener('pointermove',event=>{
+    if (!sysdDrag||event.pointerId!==sysdDrag.id) return;
+    const dx=event.clientX-sysdDrag.x, dy=event.clientY-sysdDrag.y;
+    if (!sysdDrag.moved&&Math.hypot(dx,dy)<4) return;
+    sysdDrag.moved=true; main.querySelector('#sysd-stage')?.classList.add('is-dragging');
+    if (sysdDrag.mm) { const p=new DOMPoint(event.clientX,event.clientY).matrixTransform(sysdDrag.ctm); sysdSetCam({...sysdCam,x:p.x-sysdCam.w/2,y:p.y-sysdCam.h/2},false); return; }
+    const scale=sysdDrag.ctm.a;
+    sysdSetCam({...sysdDrag.cam,x:sysdDrag.cam.x-dx*scale,y:sysdDrag.cam.y-dy*scale},false);
+  });
+  document.addEventListener('pointerup',()=>{ if (!sysdDrag) return; const d=sysdDrag; main.querySelector('#sysd-stage')?.classList.remove('is-dragging'); setTimeout(()=>{ if (sysdDrag===d) sysdDrag=null; },0); });
 
   function announce(text) {
     document.getElementById('announcement').textContent = text;
@@ -17137,6 +18245,8 @@ span.model-cite {cursor:default}
     document.getElementById('catalog-answer-title')?.focus({preventScroll:true});
     announce(question.ranks.length+' ranked sources');
     readQuestionCriteria(query);
+    // After the criteria status line is in place, so its synchronous refresh does not replace revealing rows.
+    exploreMotionAnswer();
   }
 
   document.addEventListener('submit',event=>{
@@ -17287,6 +18397,7 @@ span.model-cite {cursor:default}
       state.guide=null;
       if (state.explorePane==='map'&&state.selectedFixture) state.inspect=false;
       render(state.explorePane==='map'?atlasCatalogReturnCamera:null);
+      exploreMotionPane();
       exploreTop.querySelector('[data-explore-pane="'+state.explorePane+'"]').focus({preventScroll:true});
       return;
     }
@@ -17785,6 +18896,23 @@ span.model-cite {cursor:default}
           document.getElementById('catalog-answer-title')?.focus({preventScroll:true});
         }
         break;
+      case 'report-passages-more': {
+        const extra=control.closest('.report-passages').querySelectorAll('[data-passage-extra]');
+        const opening=control.getAttribute('aria-expanded')!=='true';
+        extra.forEach(item=>{item.hidden=!opening;});
+        control.setAttribute('aria-expanded',String(opening));
+        control.textContent=opening?'Show fewer passages':'Show '+extra.length+' more '+(extra.length===1?'passage':'passages');
+        if (opening) exploreMotionReveal([extra]);
+        break;
+      }
+      case 'catalog-reason-toggle': {
+        const row=control.closest('[data-reason-fold]');
+        const opening=row.dataset.reasonFold!=='open';
+        row.dataset.reasonFold=opening?'open':'closed';
+        control.setAttribute('aria-expanded',String(opening));
+        control.textContent=opening?'Shorter reason':'Full reason';
+        break;
+      }
       case 'catalog-ranked-evidence':
         openRecordEvidence(control.dataset.rankedRun);
         break;
@@ -17792,8 +18920,13 @@ span.model-cite {cursor:default}
         const id=control.dataset.investigation;
         state.catalogInvestigation=state.catalogInvestigation===id?'':id;
         if (state.explorePane==='needs') renderNeeds();
-        else if (state.catalogMatches) document.getElementById('catalog-answer').innerHTML=catalogAnswer();
+        else if (state.catalogMatches) {
+          exploreMotionSettle();
+          document.getElementById('catalog-answer').innerHTML=catalogAnswer();
+        }
         else renderCatalogInvestigations();
+        exploreFitReasons();
+        exploreMotionFade(document.getElementById('investigation-'+id),6);
         document.querySelector('[data-act="catalog-investigation"][data-investigation="'+id+'"]')?.focus({preventScroll:true});
         announce(state.catalogInvestigation?'Showing the '+investigationProfiles.find(profile=>profile.id===id).name+' profile':'Profile closed');
         break;
@@ -17806,7 +18939,9 @@ span.model-cite {cursor:default}
         break;
       case 'catalog-citation':
         state.catalogCitation=Number(control.dataset.citationIndex);
+        exploreMotionSettle();
         document.getElementById('catalog-answer').innerHTML=catalogAnswer();
+        exploreMotionFade(document.getElementById('catalog-cited-source'));
         const container=control.closest('.catalog-ranked-locator')?'.catalog-ranked-locator ':'.catalog-answer-findings ';
         document.querySelector(container+'[data-act="catalog-citation"][data-citation-index="'+state.catalogCitation+'"]')?.focus({preventScroll:true});
         if (matchMedia('(max-width:900px)').matches&&container==='.catalog-ranked-locator ') {
@@ -17827,6 +18962,7 @@ span.model-cite {cursor:default}
       case 'catalog-next': {
         state.catalogPage+=control.dataset.act==='catalog-next'?1:-1;
         renderCatalogRows();
+        exploreMotionFade(main.querySelector('.catalog-table tbody'));
         const target=main.querySelector('[data-act="'+control.dataset.act+'"]:enabled')||main.querySelector('.catalog-pager button:enabled');
         target?.focus({preventScroll:true});
         break;
@@ -17856,6 +18992,7 @@ span.model-cite {cursor:default}
       state.catalogSort=field.value;
       state.catalogPage=0;
       renderCatalogRows();
+      exploreMotionFade(main.querySelector('.catalog-table tbody'));
       document.getElementById('catalog-sort')?.focus({preventScroll:true});
       return;
     }
