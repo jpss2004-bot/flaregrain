@@ -1,0 +1,32 @@
+{
+ "built": "2026-11-13",
+ "source_dashboard_sha256": "1aee9c94ed53147872b54bfa2bbf4b36761385553f76cd108e6e1c1fa2d75860",
+ "files": {
+  "NOTICE.md": "2ab0efc6ec141f8966109dd854954c46b4f6df0fdbf437d392edded3a0e37609",
+  "Presentation assets/NASA BASS-II - Figure 1.2.jpg": "f3eca5d44e10ec9c2c56dea906379f1cad3ba29f0b16ce10cfb107a2e78476e0",
+  "Source excerpts/B10 observation.png": "9512c4ea45efb8c0b630eed75843b850dbc2b9804405a890a11e7db5e23e2410",
+  "Source excerpts/B11 observation.png": "32435f0e575026ecfe6046fbf31d667622b528fe7a4ff3d97fb156541caa9c37",
+  "Source excerpts/BASS GMT96-T7 appendix.png": "cda209adf8f7c9943d6ccb2345bd7db5cedc7627fc508928579e1222742b7c11",
+  "Source excerpts/BASS-II B1 still 051097.png": "729a7d58931a7d1938fae9812b570dcfd6ae623d375e0cb31945be879648d699",
+  "Source excerpts/FLEX test 2 Table IX.png": "d49ba61c9a0f20894b48935a407fbcf9aed7b14bb601b8e7b0552ae45ffe27ef",
+  "Source excerpts/SAME-R Kapton Table 1.png": "ba4e40fbec51dcd579ced6dc8408472e0ec02c102f4a8859af87d1f477f754cc",
+  "Source excerpts/Saffire I-1 cutoff.png": "2b71736970503ea3411739104c4a98a9f02c98670db9338ca1485e88f75ea66b",
+  "Source excerpts/Saffire I-1 measurements.png": "b2a692f00e8f4698516ede7ffca95ac7a32d87a568ed932e55532024eb8f948e",
+  "Source excerpts/Saffire II-5 measurements.png": "1bdbd1021a7396f2142c7cb0f6421366482fd53f89bd4995db43d885f2cf6c46",
+  "Source excerpts/Saffire III-1 measurements.png": "e1042e848b8a53f5354c5f10755edcc2c865b463f3042098231169b14cd1a3d7",
+  "Source excerpts/Saffire spread rate comparison.png": "95e51f27cbf1e506e9610b2860a048c2ad4aeeb32cf25582992139886c8dfa9f",
+  "Sparkline Foundry mark.svg": "6979825465b6fed2637c4e2c308ae1a9b1c8b0d753f243ac339b0aca295ba094",
+  "Vendor/GSAP 3.15.1 LICENSE.txt": "d81103abc7060ab8ea4f8749f9d8d80a046c4491680c391bfd14082abea2428f",
+  "Vendor/Instrument Sans OFL.txt": "9e27a72ed30eb49a08678f6a5d6ed98ec7ba5368f541637ee0683ec9134ef966",
+  "Vendor/InstrumentSans-variable.woff2": "b289f118201b8ec56f2484e6853a34eac8b646c737686d25d078ef84e95bd799",
+  "Vendor/d3-color-3.1.0.min.js": "a12639010163230b8c130fbeb92a3a49bb5f6989a566d3664d759522db458489",
+  "Vendor/d3-color-LICENSE.txt": "faa682e3e430941f958d26180458f5934a62f58dac4d70ccdd15608c15d0f884",
+  "Vendor/d3-interpolate-3.0.1.min.js": "bfc321e4c3f3b3aadc88cfe15ccb5e443abfeadef8b75c65b41c33a4d78a98ae",
+  "Vendor/d3-interpolate-LICENSE.txt": "e008c5e25a6be382593089c29bfabbc553c6378eee02895aec46ce396cc404ee",
+  "Vendor/gsap-3.15.1.min.js": "3d1bea374ab1b703cc5c4105358eec63c4465efdc573931dc116e34a0a190c1b",
+  "Vendor/gsap-Flip-3.15.1.min.js": "6e9434933eb2b67373947cdb30e70fdba59b68bb8fa480df4251917c71574199",
+  "foundry-icon.svg": "ea753495e2c327917da2d63734d4f2f2c8ba5d7df915eb5ec81944fa3f3faf47",
+  "foundry-touch-icon.png": "787ca9b55a1b1a58ff8ff98131037a499b08b1da1e51dcd738e456276ec99942",
+  "index.html": "98fff261f51ae0b7703fc86d7094f5e3ccd56ea99f9b15b6ef43e5db1f0bf5e1"
+ }
+}

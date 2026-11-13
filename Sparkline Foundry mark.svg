@@ -1,0 +1,5 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 48 48" role="img" aria-label="Sparkline Foundry" color="#f2f6ff">
+  <title>Sparkline Foundry</title>
+  <path fill="currentColor" d="M7 20v-7l7-7h20l-6 5H16l-4 4v5zm34 8v7l-7 7H14l6-5h12l4-4v-5z"/>
+  <path fill="none" stroke="#ffa8d4" stroke-width="4.1" stroke-linecap="round" stroke-linejoin="round" d="M7 27h10l5-10 5 14 5-8h9"/>
+</svg>
