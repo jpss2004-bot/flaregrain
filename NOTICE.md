@@ -1,6 +1,6 @@
 # Flaregrain · public build
 
-Built 2026-11-13 from the team's rehearsal dashboard. Static files only: no account, no server, no model.
+Built 2026-11-14 from the team's rehearsal dashboard. Static files only: no account, no server, no model.
 
 **NASA data.** NASA Physical Sciences Informatics (PSI) combustion repository, 24 investigations and their experimental tables (CC0-1.0 on 23 records; PSI-10's licence field is blank). NASA reports on NTRS as cited on each value. Context pages from nasa.gov, sma.nasa.gov and spinoff.nasa.gov are linked, not copied.
 

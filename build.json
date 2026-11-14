@@ -1,8 +1,8 @@
 {
- "built": "2026-11-13",
- "source_dashboard_sha256": "023d71119c1cad533343e6538b5373bf37dd2b5e57384b5e24f7e4cef2abd716",
+ "built": "2026-11-14",
+ "source_dashboard_sha256": "c586f07eff0182436c1e810727c26473b13965d70ebd41606a2d508a0785be37",
  "files": {
-  "NOTICE.md": "2ab0efc6ec141f8966109dd854954c46b4f6df0fdbf437d392edded3a0e37609",
+  "NOTICE.md": "05a0496c800f66d4236436613dd2d330e760d9bc8740b407f1e2977726b1991e",
   "Presentation assets/NASA BASS-II - Figure 1.2.jpg": "f3eca5d44e10ec9c2c56dea906379f1cad3ba29f0b16ce10cfb107a2e78476e0",
   "Source excerpts/B10 observation.png": "9512c4ea45efb8c0b630eed75843b850dbc2b9804405a890a11e7db5e23e2410",
   "Source excerpts/B11 observation.png": "32435f0e575026ecfe6046fbf31d667622b528fe7a4ff3d97fb156541caa9c37",
@@ -27,6 +27,6 @@
   "Vendor/gsap-Flip-3.15.1.min.js": "6e9434933eb2b67373947cdb30e70fdba59b68bb8fa480df4251917c71574199",
   "foundry-icon.svg": "ea753495e2c327917da2d63734d4f2f2c8ba5d7df915eb5ec81944fa3f3faf47",
   "foundry-touch-icon.png": "787ca9b55a1b1a58ff8ff98131037a499b08b1da1e51dcd738e456276ec99942",
-  "index.html": "6a5c50e9abea6514a6ed7afe7a6723a4711d401cbc4b48e112e7cb26f58052e9"
+  "index.html": "25e5c3a6649356682cee2c292bad8f2fd0e103e5839302c1985b270d63cc9850"
  }
 }
